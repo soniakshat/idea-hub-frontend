@@ -40,9 +40,11 @@ function Login() {
       console.log('API Response:', response); // Log the API response
 
       if (response.status === 200) {
-        const { token } = response.data;
+        const { token, name, id } = response.data;
         localStorage.setItem('authToken', token);
-        message.success('Login successful! Redirecting to home page...');
+        localStorage.setItem('userId', id);
+        localStorage.setItem('userName', name);
+        message.success(`Welcome, ${name}! Redirecting to home page...`); // Personalized success message
         navigate('/home'); // Redirect to home
       } else {
         throw new Error('Invalid response status: ' + response.status);

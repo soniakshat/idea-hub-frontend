@@ -22,17 +22,19 @@ function CreatePost() {
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem('authToken'); // Retrieve token
-
+      const user_name = localStorage.getItem('userName'); // Retrieve token
+      const user_id = localStorage.getItem('userId'); // Retrieve token
+      
       const postData = {
         post: {
           author: {
-            id: 'T111', // Hardcoded author ID for now
-            name: 'Tony', // Hardcoded author name for now
+            id: user_id.toString(), // Hardcoded author ID for now
+            name: user_name, // Hardcoded author name for now
           },
           id: Date.now().toString(), // Generate unique ID for the post
           title: post.title,
-          tags: post.tags.split(','), // Convert comma-separated tags to array
-          business: [],
+          tags: post.tags.split(',').map(tag => tag.trim()), // Convert comma-separated tags to array
+          business: post.business.split(',').map(business => business.trim()), // Convert comma-separated business to array
           status: post.status,
           content: post.content,
           timestamp: new Date().toISOString(), // Current timestamp
@@ -87,13 +89,21 @@ function CreatePost() {
             />
           </Form.Item>
 
-          <Form.Item label="Status">
+          <Form.Item label="Business (comma-separated)">
+            <Input
+              name="business"
+              placeholder="Enter business (e.g., innovations, amrock, mortgage)"
+              onChange={handleChange}
+            />
+          </Form.Item>
+
+          {/* <Form.Item label="Status">
             <Input
               name="status"
               placeholder="Enter status (e.g., draft or published)"
               onChange={handleChange}
             />
-          </Form.Item>
+          </Form.Item> */}
 
           <Button type="primary" htmlType="submit">
             Create Post
