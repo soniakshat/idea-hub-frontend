@@ -49,7 +49,7 @@ function CreatePost() {
       });
 
       message.success('Post created successfully!');
-      navigate('/'); // Redirect to home page after successful creation
+      navigate('/home'); // Redirect to home page after successful creation
     } catch (error) {
       console.error('Error creating post:', error.response || error);
       message.error('Failed to create post. Please try again.');
