@@ -1,0 +1,19 @@
+// src/api.js
+import axios from 'axios';
+
+const API = axios.create({
+  baseURL: 'https://api.techqubits.com', // Use HTTP as required
+});
+
+// Add a request interceptor to attach the token automatically
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`; // Attach token to every request
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+export default API;

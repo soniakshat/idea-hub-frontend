@@ -1,0 +1,102 @@
+/* src/components/Navbar.css */
+
+/* Navbar container */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 40px;
+  background-color: #1a1a1b;
+  color: white;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 100; /* Ensure the navbar stays above other content */
+}
+
+/* Left Section: Logo and Title */
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+}
+
+.navbar-logo img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.navbar-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Center Section: Search Bar */
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin: 0 20px;
+}
+
+.navbar-search {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  border-radius: 25px;
+  background-color: #272729;
+  padding: 5px 15px;
+  border: 1px solid transparent; /* Ensure it’s visible in high-contrast */
+}
+
+.navbar-search input {
+  width: 100%;
+  border: none;
+  outline: none; /* Remove blue outline */
+  background-color: transparent;
+  color: white;
+  padding: 5px 10px;
+}
+
+.navbar-search input::placeholder {
+  color: #a8a8a8;
+}
+
+/* Right Section: Buttons */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.navbar-btn {
+  color: white;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.login-btn {
+  background-color: #d93a00;
+  border: none;
+  color: white;
+  border-radius: 25px;
+  padding: 5px 20px;
+}
+
+.login-btn:hover {
+  background-color: #c23200;
+}
+
+.navbar-btn .ant-btn-icon-only {
+  font-size: 20px;
+}
