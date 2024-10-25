@@ -12,7 +12,7 @@ function App() {
     <Router>
       <Routes>
         {/* Redirect "/" to "/home" */}
-        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/" element={<Navigate to="/login" />} />
 
         {/* Protected Home Route */}
         <Route

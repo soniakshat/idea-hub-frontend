@@ -7,6 +7,8 @@
     align-items: center;
     height: 100vh;
     background-color: #f0f2f5;
+    color: #1890ff;
+    text-decoration: none;
   }
   
   /* Authentication Card */
@@ -30,5 +32,9 @@
   
   .submit-btn:hover {
     background-color: #0056b3;
+  }
+  
+  .auth-container a:hover {
+    text-decoration: underline;
   }
   

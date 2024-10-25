@@ -1,16 +1,17 @@
 // src/pages/login.jsx
 import { useState } from 'react';
-import API from '../api';
+import API from '../api'; // Axios instance
 import { Button, Input, Form, message, Typography, Card } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link from react-router-dom
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import './auth.css';
+import './auth.css'; // CSS styling
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 function Login() {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false); // Loading state
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,14 +19,41 @@ function Login() {
   };
 
   const handleLogin = async () => {
+    setLoading(true); // Start loading spinner
+
     try {
-      const response = await API.post('/user/login', credentials);
-      localStorage.setItem('authToken', response.data.token);
-      message.success('Login successful! Redirecting to home page...');
-      navigate('/home'); // Ensure this matches the route in App.jsx
+      console.log('Sending credentials:', credentials); // Log the credentials
+
+      const response = await API.post(
+        '/user/login',
+        {
+          email: credentials.email,
+          password: credentials.password,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json', // Ensure correct content type
+          },
+        }
+      );
+
+      console.log('API Response:', response); // Log the API response
+
+      if (response.status === 200) {
+        const { token } = response.data;
+        localStorage.setItem('authToken', token);
+        message.success('Login successful! Redirecting to home page...');
+        navigate('/home'); // Redirect to home
+      } else {
+        throw new Error('Invalid response status: ' + response.status);
+      }
     } catch (error) {
-      console.error('Login failed:', error);
-      message.error('Invalid email or password.');
+      console.error('Login failed:', error.response?.data || error);
+      const errorMessage =
+        error.response?.data?.message || 'Invalid email or password. Please try again.';
+      message.error(errorMessage); // Show error message from API
+    } finally {
+      setLoading(false); // Stop loading spinner
     }
   };
 
@@ -34,7 +62,13 @@ function Login() {
       <Card className="auth-card">
         <Title level={2}>Login</Title>
         <Form layout="vertical" onFinish={handleLogin}>
-          <Form.Item name="email" rules={[{ required: true, message: 'Please enter your email!' }]}>
+          <Form.Item
+            name="email"
+            rules={[
+              { required: true, message: 'Please enter your email!' },
+              { type: 'email', message: 'Please enter a valid email!' },
+            ]}
+          >
             <Input
               name="email"
               prefix={<MailOutlined />}
@@ -53,10 +87,20 @@ function Login() {
               onChange={handleChange}
             />
           </Form.Item>
-          <Button type="primary" htmlType="submit" className="submit-btn">
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="submit-btn"
+            loading={loading}
+          >
             Log In
           </Button>
         </Form>
+        {/* Signup Text and Link */}
+        <div style={{ marginTop: '10px', textAlign: 'center' }}>
+          <Text>Don't have an account? </Text>
+          <Link to="/signup">Sign up</Link>
+        </div>
       </Card>
     </div>
   );
