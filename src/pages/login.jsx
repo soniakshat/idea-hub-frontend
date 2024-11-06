@@ -62,6 +62,7 @@ function Login() {
   return (
     <div className="auth-container">
       <Card className="auth-card">
+        <img src="/public/Idea-nexus.png" width="150" height="150" alt="Logo for Ideahub by Idea Nexus"></img>
         <Title level={2}>Login</Title>
         <Form layout="vertical" onFinish={handleLogin}>
           <Form.Item
