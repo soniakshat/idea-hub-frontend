@@ -4,6 +4,8 @@ import Home from './pages/home';
 import Login from './pages/login';
 import Signup from './pages/signup';
 import CreatePost from './pages/createPost';
+import MyPosts from './pages/MyPosts';
+import EditPost from './pages/EditPost';
 import Page404 from './pages/Page404';
 import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
 
@@ -27,6 +29,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/myposts" element={<MyPosts />} />
+        <Route path="/edit/:postId" element={<EditPost />} />
         <Route path="/404" element={<Page404 />} />
 
         {/* Catch-all route to handle unknown paths */}

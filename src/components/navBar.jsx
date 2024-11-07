@@ -28,6 +28,11 @@ function Navbar({ onSearch }) {
 
       {/* Right Section: Buttons */}
       <div className="navbar-right">
+        <Link to="/myposts">
+          <Button type="primary" className="login-btn">
+            My Posts
+          </Button>
+        </Link>
         <Link to="/create-post">
           <Button type="primary" className="login-btn">
             Create Post
