@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Row, Col } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import API from '../api';
 import Navbar from '../components/Navbar';
 
@@ -7,6 +8,17 @@ function MyPosts() {
   const [posts, setPosts] = useState([]);
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Define colors for different statuses
+  const statusColors = {
+    "draft": "#A9A9A9",
+    "in review": "#FFD700",
+    "approved": "#32CD32",
+    "in development": "#1E90FF",
+    "testing": "#FF8C00",
+    "completed": "#4B0082",
+    "archived": "#808080"
+  };
 
   // Utility function to format date
   const formatDate = (timestamp) => {
@@ -58,6 +70,42 @@ function MyPosts() {
     setFilteredPosts(filtered);
   };
 
+  // Handle upvote toggle
+  const handleUpvote = async (postId, isUpvoted, index) => {
+    try {
+      const increment = isUpvoted ? -1 : 1;
+      const response = await API.put(`/api/posts/${postId}/upvote`, { increment });
+
+      const updatedPosts = [...filteredPosts];
+      updatedPosts[index] = {
+        ...updatedPosts[index],
+        upvotes: response.data.upvotes,
+        isUpvoted: !isUpvoted,
+      };
+      setFilteredPosts(updatedPosts);
+    } catch (error) {
+      console.error('Error updating upvote:', error);
+    }
+  };
+
+  // Handle downvote toggle
+  const handleDownvote = async (postId, isDownvoted, index) => {
+    try {
+      const increment = isDownvoted ? -1 : 1;
+      const response = await API.put(`/api/posts/${postId}/downvote`, { increment });
+
+      const updatedPosts = [...filteredPosts];
+      updatedPosts[index] = {
+        ...updatedPosts[index],
+        downvotes: response.data.downvotes,
+        isDownvoted: !isDownvoted,
+      };
+      setFilteredPosts(updatedPosts);
+    } catch (error) {
+      console.error('Error updating downvote:', error);
+    }
+  };
+
   if (loading) {
     return <h2>Loading your posts...</h2>;
   }
@@ -67,7 +115,7 @@ function MyPosts() {
       <Navbar onSearch={handleSearch} />
       <div style={{ padding: '20px' }}>
         <Row gutter={[16, 16]}>
-          {filteredPosts.map((post) => (
+          {filteredPosts.map((post, index) => (
             <Col key={post.id} xs={24} sm={12} md={8} lg={6}>
               <article
                 style={{
@@ -102,7 +150,7 @@ function MyPosts() {
                       padding: '4px 8px',
                       borderRadius: '4px',
                       fontSize: '0.8rem',
-                      backgroundColor: '#4caf50',
+                      backgroundColor: statusColors[post.status?.toLowerCase()] || '#000000',
                       color: 'white',
                     }}
                   >
@@ -207,8 +255,15 @@ function MyPosts() {
                         cursor: 'pointer',
                         fontSize: '0.9rem',
                       }}
+                      onClick={() => handleUpvote(post._id, post.isUpvoted, index)} 
                     >
-                      ↑ {post.upvotes}
+                      <ArrowUpOutlined
+                        style={{
+                          color: post.isUpvoted ? '#4caf50' : '#666',
+                          fontSize: '1.2rem',
+                        }}
+                      />
+                      {post.upvotes}
                     </button>
                     <button
                       style={{
@@ -221,8 +276,15 @@ function MyPosts() {
                         cursor: 'pointer',
                         fontSize: '0.9rem',
                       }}
+                      onClick={() => handleDownvote(post._id, post.isDownvoted, index)}
                     >
-                      ↓ {post.downvotes}
+                      <ArrowDownOutlined
+                        style={{
+                          color: post.isDownvoted ? '#FF0000' : '#666',
+                          fontSize: '1.2rem',
+                        }}
+                      />
+                      {post.downvotes}
                     </button>
                   </div>
                   <div>{post.comments.length} comments</div>
