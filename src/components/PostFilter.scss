@@ -1,0 +1,93 @@
+// src/components/PostFilter.scss
+
+.post-filter-container {
+    position: fixed;
+    top: 70px; // Adjust for navbar height
+    left: 0;
+    width: 300px;
+    height: calc(100vh - 70px); // Full height minus the navbar height
+    background-color: #f9f9f9;
+    box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    font-weight: bold;
+}
+
+.clear-filters-btn {
+    color: #ff4d4f;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.search-input {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 0 20px 10px;
+}
+
+.filter-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; // Make this container grow to fill available space
+    overflow-y: auto;
+    padding: 0 20px;
+    gap: 10px;
+
+    .filter-section {
+        flex: 1; // Allow each section to take equal space
+        overflow-y: auto;
+        margin-bottom: 10px;
+
+        h3 {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+
+            input {
+                margin-right: 8px;
+            }
+        }
+    }
+}
+
+.apply-button-container {
+    padding: 10px 20px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #fff;
+}
+
+.apply-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #1d72b8;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #1666a3;
+    }
+}

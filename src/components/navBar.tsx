@@ -3,13 +3,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Input, Button } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import './Navbar.css';
+import './Navbar.scss';
 
 interface NavbarProps {
-   onSearch?: (query: string) => void; // Make onSearch optional
+   onSearch?: (query: string) => void;
+   expandFilter: () => void; // Add expandFilter to NavbarProps
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
+const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
   return (
     <div className="navbar">
       {/* Left Section: Logo */}
@@ -26,13 +27,16 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
           className="navbar-search"
           placeholder="Search Idea"
           prefix={<SearchOutlined />}
-          onChange={(e) => onSearch && onSearch(e.target.value)} // Check if onSearch is defined
+          onChange={(e) => onSearch && onSearch(e.target.value)}
           allowClear
         />
       </div>
 
       {/* Right Section: Buttons */}
       <div className="navbar-right">
+        <Button type="link" className="filter-btn" onClick={expandFilter}>
+          Filters
+        </Button>
         <Link to="/myposts">
           <Button type="primary" className="login-btn">
             My Posts

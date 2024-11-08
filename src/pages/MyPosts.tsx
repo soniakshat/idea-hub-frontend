@@ -1,89 +1,54 @@
 // src/pages/MyPosts.tsx
 import React, { useEffect, useState } from 'react';
 import API from '../api';
-import Navbar from '../components/navBar';
+import Navbar from '../components/Navbar';
 import PostCard from '../components/PostCard';
+import PostFilter from '../components/PostFilter'; // Import PostFilter component
 import { Skeleton, Row, Col } from 'antd';
-
-interface Post {
-  _id: string;
-  id: string;
-  title: string;
-  content: string;
-  author: {
-    name: string;
-  };
-  tags?: string[];
-  business?: string[];
-  status: string;
-  timestamp: string;
-  upvotes: number;
-  downvotes: number;
-  isUpvoted: boolean;
-  isDownvoted: boolean;
-  comments: { id: string; content: string }[];
-}
-
-const statusColors: Record<string, string> = {
-  draft: "#FF5A5F",
-  "in review": "#FFD700",
-  approved: "#00FF7F",
-  "in development": "#00BFFF",
-  testing: "#FFA500",
-  completed: "#8A2BE2",
-  archived: "#D3D3D3",
-};
-
-const formatDate = (timestamp: string): string => {
-  const date = new Date(timestamp);
-  return date.toLocaleString('en-US', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-};
+import { formatDate, getLocalStorageItem } from '../utils/utils';
+import { handleSearch, handleUpvote, handleDownvote } from '../utils/postActions';
+import { Post } from '../types/Post';
 
 const MyPosts: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [availableBusinesses, setAvailableBusinesses] = useState<string[]>([]);
+  const [isFilterExpanded, setIsFilterExpanded] = useState<boolean>(false);
+
+  const statusColors: Record<string, string> = {
+    "draft": "#A9A9A9",
+    "in review": "#FFD700",
+    "approved": "#32CD32",
+    "in development": "#1E90FF",
+    "testing": "#FF8C00",
+    "completed": "#4B0082",
+    "archived": "#808080",
+  };
 
   useEffect(() => {
     const fetchUserPosts = async () => {
       try {
-        const token = localStorage.getItem('authToken');
-        const userId = localStorage.getItem('userId');
-        
-        const response = await API.get(`/api/posts/myposts`, {
+        const token = getLocalStorageItem('authToken');
+        const userId = getLocalStorageItem('userId');
+
+        const response = await API.get('/api/posts/myposts', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
           params: { userId },
         });
 
-        // Add default values for fields if they are missing
-        const postsWithDefaults = response.data.map((post: Partial<Post>) => ({
-          _id: post._id || post.id, // Ensure `_id` is set, using `id` if available
-          title: post.title || '',
-          content: post.content || '',
-          author: post.author || { name: 'Unknown' },
-          tags: post.tags || [],
-          business: post.business || [],
-          status: post.status || 'draft',
-          timestamp: post.timestamp || new Date().toISOString(),
-          upvotes: post.upvotes || 0,
-          downvotes: post.downvotes || 0,
-          isUpvoted: post.isUpvoted || false,
-          isDownvoted: post.isDownvoted || false,
-          comments: post.comments || [],
-        })) as Post[];
+        setPosts(response.data);
+        setFilteredPosts(response.data);
 
-        setPosts(postsWithDefaults);
-        setFilteredPosts(postsWithDefaults);
+        // Extract tags and businesses for filter options
+        const tags = Array.from(new Set(response.data.flatMap((post: Post) => post.tags || []))) as string[];
+        const businesses = Array.from(new Set(response.data.flatMap((post: Post) => post.business || []))) as string[];
+
+        setAvailableTags(tags);
+        setAvailableBusinesses(businesses);
       } catch (error) {
         console.error('Error fetching user posts:', error);
       } finally {
@@ -94,68 +59,51 @@ const MyPosts: React.FC = () => {
     fetchUserPosts();
   }, []);
 
-  const handleSearch = (query: string) => {
-    const filtered = posts.filter(
-      (post) =>
-        post.title.toLowerCase().includes(query.toLowerCase()) ||
-        post.content.toLowerCase().includes(query.toLowerCase())
+  const handleSearchPosts = (query: string) => {
+    setFilteredPosts(handleSearch(posts, query));
+  };
+
+  const applyFilters = (selectedTags: string[], selectedBusinesses: string[]) => {
+    const filtered = posts.filter((post) =>
+      (selectedTags.length === 0 || (post.tags && post.tags.some((tag) => selectedTags.includes(tag)))) &&
+      (selectedBusinesses.length === 0 || (post.business && post.business.some((business) => selectedBusinesses.includes(business))))
     );
     setFilteredPosts(filtered);
   };
 
-  const handleUpvote = async (postId: string, isUpvoted: boolean, index: number) => {
-    try {
-      const increment = isUpvoted ? -1 : 1;
-      const response = await API.put(`/api/posts/${postId}/upvote`, { increment });
-
-      const updatedPosts = [...filteredPosts];
-      updatedPosts[index] = {
-        ...updatedPosts[index],
-        upvotes: response.data.upvotes,
-        isUpvoted: !isUpvoted,
-      };
-      setFilteredPosts(updatedPosts);
-    } catch (error) {
-      console.error('Error updating upvote:', error);
-    }
-  };
-
-  const handleDownvote = async (postId: string, isDownvoted: boolean, index: number) => {
-    try {
-      const increment = isDownvoted ? -1 : 1;
-      const response = await API.put(`/api/posts/${postId}/downvote`, { increment });
-
-      const updatedPosts = [...filteredPosts];
-      updatedPosts[index] = {
-        ...updatedPosts[index],
-        downvotes: response.data.downvotes,
-        isDownvoted: !isDownvoted,
-      };
-      setFilteredPosts(updatedPosts);
-    } catch (error) {
-      console.error('Error updating downvote:', error);
-    }
-  };
-
- if (loading) {
-   return (
-     <>
-       <Navbar/>
-     <Row gutter={[16, 16]} style={{ padding: '20px' }}>
-      {Array.from({ length: 8 }).map((_, index) => (
-        <Col key={index} xs={24} sm={12} md={8} lg={6}>
-          <Skeleton active avatar paragraph={{ rows: 4 }} />
-        </Col>
-      ))}
-       </Row>
-       </>
-  );
-}
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <Row gutter={[16, 16]} style={{ padding: '20px' }}>
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Col key={index} xs={24} sm={12} md={8} lg={6}>
+              <Skeleton active avatar paragraph={{ rows: 4 }} />
+            </Col>
+          ))}
+        </Row>
+      </>
+    );
+  }
 
   return (
     <>
-      <Navbar onSearch={handleSearch} />
-      <div style={{ padding: '20px' }}>
+      <Navbar
+        onSearch={handleSearchPosts}
+        expandFilter={() => setIsFilterExpanded(!isFilterExpanded)}
+      />
+
+      {isFilterExpanded && (
+        <PostFilter
+          tags={availableTags}
+          businesses={availableBusinesses}
+          onApplyFilters={applyFilters}
+          isExpanded={isFilterExpanded}
+          onToggleExpand={() => setIsFilterExpanded(false)}
+        />
+      )}
+
+      <div style={{ padding: '20px', marginLeft: isFilterExpanded ? '300px' : '0', transition: 'margin-left 0.3s ease' }}>
         <Row gutter={[16, 16]}>
           {filteredPosts.map((post, index) => (
             <PostCard
@@ -164,8 +112,8 @@ const MyPosts: React.FC = () => {
               index={index}
               statusColors={statusColors}
               formatDate={formatDate}
-              handleUpvote={handleUpvote}
-              handleDownvote={handleDownvote}
+              handleUpvote={() => handleUpvote(post._id, post.isUpvoted, index, filteredPosts, setFilteredPosts)}
+              handleDownvote={() => handleDownvote(post._id, post.isDownvoted, index, filteredPosts, setFilteredPosts)}
             />
           ))}
         </Row>

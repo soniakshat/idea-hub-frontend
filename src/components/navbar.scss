@@ -1,0 +1,154 @@
+/* src/components/Navbar.scss */
+
+// Variables
+$navbar-bg-color: #1a1a1b;
+$text-color: white;
+$hover-color: #f0a500;
+$button-radius: 20px;
+$shadow-color: rgba(0, 0, 0, 0.3);
+
+/* Offset main content below the navbar */
+body {
+  margin-top: 70px;
+}
+
+// Navbar container styles
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 40px;
+  background-color: $navbar-bg-color;
+  color: $text-color;
+  height: 70px;
+  box-sizing: border-box;
+  z-index: 100;
+  box-shadow: 0 4px 8px $shadow-color;
+
+  // Left Section: Logo and Title
+  &-left {
+    display: flex;
+    align-items: center;
+  }
+
+  &-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: $text-color;
+    transition: color 0.2s ease-in-out;
+
+    &:hover {
+      color: $hover-color;
+    }
+
+    img {
+      height: 45px;
+      margin-right: 12px;
+    }
+  }
+
+  &-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  // Center Section: Search Bar
+  &-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin: 0 20px;
+  }
+
+  &-search {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    border-radius: 25px;
+    background-color: #272729;
+    padding: 6px 20px;
+    border: 1px solid transparent;
+    transition: border-color 0.3s ease;
+
+    &:hover,
+    &:focus-within {
+      border-color: #3b82f6;
+    }
+
+    input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background-color: transparent;
+      color: $text-color;
+      padding: 6px 12px;
+      font-size: 15px;
+
+      &::placeholder {
+        color: #a8a8a8;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  // Right Section: Buttons
+  &-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+}
+
+// Mixin for Button Styles
+@mixin button-styles($bg-color, $hover-color, $text-color: white) {
+  background-color: $bg-color;
+  color: $text-color;
+  border: none;
+  border-radius: $button-radius;
+  padding: 8px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: $hover-color;
+  }
+}
+
+// Button Styles
+.my-posts-btn {
+  @include button-styles(#3b82f6, #1e6fe0);
+}
+
+.create-post-btn {
+  @include button-styles(#22c55e, #16a34a);
+}
+
+.logout-btn {
+  background-color: transparent;
+  color: #ff4d4f;
+  border: 2px solid #ff4d4f;
+  border-radius: $button-radius;
+  padding: 8px 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #ff4d4f;
+    color: white;
+  }
+}
+
+.filter-btn {
+  @include button-styles(#facc15, #eab308, #1a1a1b);
+}
