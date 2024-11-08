@@ -10,7 +10,7 @@ function Navbar({ onSearch }) {
       {/* Left Section: Logo */}
       <div className="navbar-left">
         <Link to="/home" className="navbar-logo">
-        <img  src="/public/Idea-nexus.png"></img>
+        <img  src="/Idea-nexus.png"></img>
           <span className="navbar-title">Ideahub</span>
         </Link>
       </div>
