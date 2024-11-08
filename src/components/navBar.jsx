@@ -9,7 +9,7 @@ function Navbar({ onSearch }) {
     <div className="navbar">
       {/* Left Section: Logo */}
       <div className="navbar-left">
-        <Link to="/" className="navbar-logo">
+        <Link to="/home" className="navbar-logo">
         <img  src="/public/Idea-nexus.png"></img>
           <span className="navbar-title">Ideahub</span>
         </Link>

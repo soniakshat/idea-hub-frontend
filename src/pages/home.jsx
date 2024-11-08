@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Row, Col } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import API from '../api';
 import Navbar from '../components/Navbar';
 
@@ -9,19 +10,19 @@ function Home() {
   const [loading, setLoading] = useState(true);
 
   // Utility function to convert timestamp to a readable format
-const formatDate = (timestamp) => {
-  const date = new Date(timestamp);
-  return date.toLocaleString('en-US', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
   };
-  
+
   // Fetch posts from the API on component mount
   useEffect(() => {
     const fetchPosts = async () => {
@@ -55,6 +56,42 @@ const formatDate = (timestamp) => {
     setFilteredPosts(filtered); // Update filtered posts based on query
   };
 
+  // Handle upvote toggle
+  const handleUpvote = async (postId, isUpvoted, index) => {
+    try {
+      const increment = isUpvoted ? -1 : 1;
+      const response = await API.put(`/api/posts/${postId}/upvote`, { increment });
+
+      const updatedPosts = [...filteredPosts];
+      updatedPosts[index] = {
+        ...updatedPosts[index],
+        upvotes: response.data.upvotes,
+        isUpvoted: !isUpvoted, // Toggle isUpvoted state
+      };
+      setFilteredPosts(updatedPosts);
+    } catch (error) {
+      console.error('Error updating upvote:', error);
+    }
+  };
+
+  // Handle downvote toggle
+  const handleDownvote = async (postId, isDownvoted, index) => {
+    try {
+      const increment = isDownvoted ? -1 : 1;
+      const response = await API.put(`/api/posts/${postId}/downvote`, { increment });
+
+      const updatedPosts = [...filteredPosts];
+      updatedPosts[index] = {
+        ...updatedPosts[index],
+        downvotes: response.data.downvotes,
+        isDownvoted: !isDownvoted, // Toggle isUpvoted state
+      };
+      setFilteredPosts(updatedPosts);
+    } catch (error) {
+      console.error('Error updating upvote:', error);
+    }
+  };
+
   if (loading) {
     return <h2>Loading posts...</h2>;
   }
@@ -64,7 +101,7 @@ const formatDate = (timestamp) => {
       <Navbar onSearch={handleSearch} />
       <div style={{ padding: '20px' }}>
         <Row gutter={[16, 16]}>
-          {filteredPosts.map((post) => (
+          {filteredPosts.map((post, index) => (
             <Col key={post.id} xs={24} sm={12} md={8} lg={6}>
               <article
                 style={{
@@ -89,9 +126,7 @@ const formatDate = (timestamp) => {
                       {post.title}
                     </h2>
                     <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '12px' }}>
-                      <time dateTime={post.timestamp}>
-                        {formatDate(post.timestamp)}
-                      </time>
+                      <time dateTime={post.timestamp}>{formatDate(post.timestamp)}</time>
                     </div>
                   </div>
                   <span
@@ -204,8 +239,15 @@ const formatDate = (timestamp) => {
                         cursor: 'pointer',
                         fontSize: '0.9rem',
                       }}
+                      onClick={() => handleUpvote(post._id, post.isUpvoted, index)} 
                     >
-                      ↑ {post.upvotes}
+                      <ArrowUpOutlined
+                        style={{
+                          color: post.isUpvoted ? '#4caf50' : '#666',
+                          fontSize: '1.2rem',
+                        }}
+                      />
+                      {post.upvotes}
                     </button>
                     <button
                       style={{
@@ -218,8 +260,15 @@ const formatDate = (timestamp) => {
                         cursor: 'pointer',
                         fontSize: '0.9rem',
                       }}
+                      onClick={() => handleDownvote(post._id, post.isDownvoted, index)}
                     >
-                      ↓ {post.downvotes}
+                      <ArrowDownOutlined
+                        style={{
+                          color: post.isDownvoted ? '#FF0000' : '#666',
+                          fontSize: '1.2rem',
+                        }}
+                      />
+                      {post.downvotes}
                     </button>
                   </div>
                   <div>{post.comments.length} comments</div>
