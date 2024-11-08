@@ -1,25 +1,46 @@
+// src/pages/Home.tsx
+import React from 'react';
 import { useEffect, useState } from 'react';
-import { Row } from 'antd';
 import API from '../api';
 import Navbar from '../components/Navbar';
 import PostCard from '../components/PostCard';
+import { Skeleton, Row, Col } from 'antd';
+
+interface Post {
+  _id: string; // Added `_id` property
+  id: string;
+  title: string;
+  content: string;
+  upvotes: number;
+  downvotes: number;
+  isUpvoted: boolean;
+  isDownvoted: boolean;
+  status: string;
+  timestamp: string;
+  author: {
+    name: string;
+  };
+  tags?: string[];
+  business?: string[];
+  comments: { id: string; content: string; author: string; timestamp: string }[];
+}
 
 function Home() {
-  const [posts, setPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const statusColors = {
-    "draft": "#A9A9A9",
+  const statusColors: Record<string, string> = {
+    draft: "#A9A9A9",
     "in review": "#FFD700",
-    "approved": "#32CD32",
+    approved: "#32CD32",
     "in development": "#1E90FF",
-    "testing": "#FF8C00",
-    "completed": "#4B0082",
-    "archived": "#808080"
+    testing: "#FF8C00",
+    completed: "#4B0082",
+    archived: "#808080",
   };
 
-  const formatDate = (timestamp) => {
+  const formatDate = (timestamp: string): string => {
     const date = new Date(timestamp);
     return date.toLocaleString('en-US', {
       weekday: 'short',
@@ -54,7 +75,7 @@ function Home() {
     fetchPosts();
   }, []);
 
-  const handleSearch = (query) => {
+  const handleSearch = (query: string) => {
     const filtered = posts.filter(
       (post) =>
         post.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -63,7 +84,7 @@ function Home() {
     setFilteredPosts(filtered);
   };
 
-  const handleUpvote = async (postId, isUpvoted, index) => {
+  const handleUpvote = async (postId: string, isUpvoted: boolean, index: number) => {
     try {
       const increment = isUpvoted ? -1 : 1;
       const response = await API.put(`/api/posts/${postId}/upvote`, { increment });
@@ -80,7 +101,7 @@ function Home() {
     }
   };
 
-  const handleDownvote = async (postId, isDownvoted, index) => {
+  const handleDownvote = async (postId: string, isDownvoted: boolean, index: number) => {
     try {
       const increment = isDownvoted ? -1 : 1;
       const response = await API.put(`/api/posts/${postId}/downvote`, { increment });
@@ -97,9 +118,20 @@ function Home() {
     }
   };
 
-  if (loading) {
-    return <h2>Loading posts...</h2>;
-  }
+ if (loading) {
+  return (
+     <>
+       <Navbar/>
+     <Row gutter={[16, 16]} style={{ padding: '20px' }}>
+      {Array.from({ length: 8 }).map((_, index) => (
+        <Col key={index} xs={24} sm={12} md={8} lg={6}>
+          <Skeleton active avatar paragraph={{ rows: 4 }} />
+        </Col>
+      ))}
+       </Row>
+       </>
+  );
+}
 
   return (
     <>
@@ -108,7 +140,7 @@ function Home() {
         <Row gutter={[16, 16]}>
           {filteredPosts.map((post, index) => (
             <PostCard
-              key={post.id}
+              key={post._id} // Using `_id` as the unique key
               post={post}
               index={index}
               statusColors={statusColors}

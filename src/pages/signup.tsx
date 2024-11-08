@@ -1,35 +1,45 @@
-// src/pages/signup.jsx
-import { useState } from 'react';
+// src/pages/signup.tsx
+import React from 'react';
+import { useState, ChangeEvent } from 'react';
 import API from '../api'; // Axios instance
 import { Button, Input, Form, message, Typography, Card } from 'antd';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { useNavigate, Link } from 'react-router-dom';
 import { UserOutlined, MailOutlined, LockOutlined, TeamOutlined } from '@ant-design/icons';
-import './auth.css'; // CSS styling
+import './auth.css';
 
 const { Title, Text } = Typography;
 
-function Signup() {
-  const [userData, setUserData] = useState({
+// Define a type for user data
+interface UserData {
+  name: string;
+  email: string;
+  password: string;
+  department: string;
+}
+
+const Signup: React.FC = () => {
+  const [userData, setUserData] = useState<UserData>({
     name: '',
     email: '',
     password: '',
     department: '',
   });
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false); // Track loading state
 
-  // Handle input changes
-  const handleChange = (e) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Handle input changes with type for event
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Handle form submission
   const handleSignup = async () => {
-    setLoading(true); // Start loading spinner
+    setLoading(true);
 
     try {
-      console.log('Sending user data:', userData); // Log the payload
+      console.log('Sending user data:', userData);
 
       const response = await API.post(
         '/user/register',
@@ -41,24 +51,24 @@ function Signup() {
         },
         {
           headers: {
-            'Content-Type': 'application/json', // Ensure correct content type
+            'Content-Type': 'application/json',
           },
         }
       );
 
       if (response.status === 201 || response.status === 200) {
         message.success('Signup successful! Please login.');
-        navigate('/login'); // Redirect to login on success
+        navigate('/login');
       } else {
         throw new Error('Unexpected response status: ' + response.status);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup failed:', error.response?.data || error);
       const errorMessage =
         error.response?.data?.message || 'Signup failed. Please try again.';
-      message.error(errorMessage); // Show error message
+      message.error(errorMessage);
     } finally {
-      setLoading(false); // Stop loading spinner
+      setLoading(false);
     }
   };
 
@@ -118,12 +128,11 @@ function Signup() {
             type="primary"
             htmlType="submit"
             className="submit-btn"
-            loading={loading} // Show loading indicator
+            loading={loading}
           >
             Signup
           </Button>
         </Form>
-        {/* Login Text and Link */}
         <div style={{ marginTop: '10px', textAlign: 'center' }}>
           <Text>Already have an account? </Text>
           <Link to="/login">Log in</Link>
@@ -131,6 +140,6 @@ function Signup() {
       </Card>
     </div>
   );
-}
+};
 
 export default Signup;

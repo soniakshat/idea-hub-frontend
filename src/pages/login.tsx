@@ -1,28 +1,34 @@
-// src/pages/login.jsx
-import { useState } from 'react';
-import API from '../api'; // Axios instance
+// src/pages/login.tsx
+import React from 'react';
+import { useState, ChangeEvent } from 'react';
+import API from '../api';
 import { Button, Input, Form, message, Typography, Card } from 'antd';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { useNavigate, Link } from 'react-router-dom';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import './auth.css'; // CSS styling
+import './auth.css';
 
 const { Title, Text } = Typography;
 
-function Login() {
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false); // Loading state
+interface Credentials {
+  email: string;
+  password: string;
+}
 
-  const handleChange = (e) => {
+const Login: React.FC = () => {
+  const [credentials, setCredentials] = useState<Credentials>({ email: '', password: '' });
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCredentials((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLogin = async () => {
-    setLoading(true); // Start loading spinner
+    setLoading(true);
 
     try {
-      console.log('Sending credentials:', credentials); // Log the credentials
+      console.log('Sending credentials:', credentials);
 
       const response = await API.post(
         '/user/login',
@@ -32,37 +38,42 @@ function Login() {
         },
         {
           headers: {
-            'Content-Type': 'application/json', // Ensure correct content type
+            'Content-Type': 'application/json',
           },
         }
       );
 
-      console.log('API Response:', response); // Log the API response
+      console.log('API Response:', response);
 
       if (response.status === 200) {
         const { token, name, id } = response.data;
         localStorage.setItem('authToken', token);
         localStorage.setItem('userId', id);
         localStorage.setItem('userName', name);
-        message.success(`Welcome, ${name}! Redirecting to home page...`); // Personalized success message
-        navigate('/home'); // Redirect to home
+        message.success(`Welcome, ${name}! Redirecting to home page...`);
+        navigate('/home');
       } else {
         throw new Error('Invalid response status: ' + response.status);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error.response?.data || error);
       const errorMessage =
         error.response?.data?.message || 'Invalid email or password. Please try again.';
-      message.error(errorMessage); // Show error message from API
+      message.error(errorMessage);
     } finally {
-      setLoading(false); // Stop loading spinner
+      setLoading(false);
     }
   };
 
   return (
     <div className="auth-container">
       <Card className="auth-card">
-        <img src="/Idea-nexus.png" width="150" height="150" alt="Logo for Ideahub by Idea Nexus"></img>
+        <img
+          src="/Idea-nexus.png"
+          width="150"
+          height="150"
+          alt="Logo for Ideahub by Idea Nexus"
+        />
         <Title level={2}>Login</Title>
         <Form layout="vertical" onFinish={handleLogin}>
           <Form.Item
@@ -99,7 +110,6 @@ function Login() {
             Log In
           </Button>
         </Form>
-        {/* Signup Text and Link */}
         <div style={{ marginTop: '10px', textAlign: 'center' }}>
           <Text>Don't have an account? </Text>
           <Link to="/signup">Sign up</Link>
@@ -107,6 +117,6 @@ function Login() {
       </Card>
     </div>
   );
-}
+};
 
 export default Login;

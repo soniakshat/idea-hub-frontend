@@ -1,8 +1,9 @@
-// src/pages/Page404.jsx
+// src/pages/Page404.tsx
+import React from 'react';
 import { Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-function Page404() {
+const Page404: React.FC = () => {
   const navigate = useNavigate();
 
   const handleGoHome = () => {
@@ -18,6 +19,6 @@ function Page404() {
       </Button>
     </div>
   );
-}
+};
 
 export default Page404;

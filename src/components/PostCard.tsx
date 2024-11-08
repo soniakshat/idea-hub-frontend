@@ -1,19 +1,46 @@
-// components/PostCard.jsx
-
+// src/components/PostCard.tsx
 import React from 'react';
 import { Col } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 
-const PostCard = ({ 
-  post, 
-  index, 
-  statusColors, 
-  formatDate, 
-  handleUpvote, 
-  handleDownvote 
+interface Post {
+  _id: string;
+  id: string;
+  title: string;
+  content: string;
+  author: {
+    name: string;
+  };
+  tags?: string[];
+  business?: string[];
+  status: string;
+  timestamp: string;
+  upvotes: number;
+  downvotes: number;
+  isUpvoted: boolean;
+  isDownvoted: boolean;
+  comments: { id: string; content: string }[];
+}
+
+interface PostCardProps {
+  post: Post;
+  index: number;
+  statusColors: Record<string, string>;
+  formatDate: (timestamp: string) => string;
+  handleUpvote: (postId: string, isUpvoted: boolean, index: number) => void;
+  handleDownvote: (postId: string, isDownvoted: boolean, index: number) => void;
+}
+
+const PostCard: React.FC<PostCardProps> = ({
+  post,
+  index,
+  statusColors,
+  formatDate,
+  handleUpvote,
+  handleDownvote,
 }) => {
   return (
-    <Col key={post.id} xs={24} sm={12} md={8} lg={6}>
+    <Col key={post.id || post._id} xs={24} sm={12} md={8} lg={6}>
       <article
         style={{
           background: 'white',
@@ -37,9 +64,7 @@ const PostCard = ({
               {post.title}
             </h2>
             <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '12px' }}>
-              <time dateTime={post.timestamp}>
-                {formatDate(post.timestamp)}
-              </time>
+              <time dateTime={post.timestamp}>{formatDate(post.timestamp)}</time>
             </div>
           </div>
           <span
@@ -47,7 +72,7 @@ const PostCard = ({
               padding: '4px 8px',
               borderRadius: '4px',
               fontSize: '0.8rem',
-              backgroundColor: statusColors[post.status?.toLowerCase()] || '#000000',
+              backgroundColor: statusColors[post.status.toLowerCase()] || '#000000',
               color: 'white',
             }}
           >
@@ -85,39 +110,39 @@ const PostCard = ({
             marginBottom: '16px',
           }}
         >
-          {post.tags && post.tags.length > 0
-            ? post.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  style={{
-                    backgroundColor: '#e9ecef',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '0.8rem',
-                    color: '#495057',
-                  }}
-                >
-                  {tag}
-                </span>
-              ))
-            : (
-                <span
-                  style={{
-                    backgroundColor: '#e9ecef',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '0.8rem',
-                    color: '#495057',
-                  }}
-                >
-                  No general tags available
-                </span>
-            )}
+          {post.tags && post.tags.length > 0 ? (
+            post.tags.map((tag, idx) => (
+              <span
+                key={idx}
+                style={{
+                  backgroundColor: '#e9ecef',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  fontSize: '0.8rem',
+                  color: '#495057',
+                }}
+              >
+                {tag}
+              </span>
+            ))
+          ) : (
+            <span
+              style={{
+                backgroundColor: '#e9ecef',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                color: '#495057',
+              }}
+            >
+              No general tags available
+            </span>
+          )}
 
           {post.business &&
-            post.business.map((businessTag, index) => (
+            post.business.map((businessTag, idx) => (
               <span
-                key={index}
+                key={idx}
                 style={{
                   backgroundColor: '#e3f2fd',
                   color: '#1976d2',
@@ -152,7 +177,7 @@ const PostCard = ({
                 cursor: 'pointer',
                 fontSize: '0.9rem',
               }}
-              onClick={() => handleUpvote(post._id, post.isUpvoted, index)} 
+              onClick={() => handleUpvote(post._id, post.isUpvoted, index)}
             >
               <ArrowUpOutlined
                 style={{

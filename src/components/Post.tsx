@@ -1,16 +1,29 @@
-// src/components/Post.jsx
+// src/components/Post.tsx
 
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import API from '../api';
 import { Button, Input, Tooltip } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, CommentOutlined, ShareAltOutlined } from '@ant-design/icons';
 import './Post.css';
 
-function Post({ post }) {
-  const [upvotes, setUpvotes] = useState(post.upvotes);
-  const [downvotes, setDownvotes] = useState(post.downvotes);
-  const [comments, setComments] = useState(post.comments || []);
-  const [newComment, setNewComment] = useState('');
+interface PostData {
+  id: string;
+  title: string;
+  content: string;
+  upvotes: number;
+  downvotes: number;
+  comments: string[]; // Assuming comments are strings; update if comments have a more complex structure
+}
+
+interface PostProps {
+  post: PostData;
+}
+
+const Post: React.FC<PostProps> = ({ post }) => {
+  const [upvotes, setUpvotes] = useState<number>(post.upvotes);
+  const [downvotes, setDownvotes] = useState<number>(post.downvotes);
+  const [comments, setComments] = useState<string[]>(post.comments || []);
+  const [newComment, setNewComment] = useState<string>('');
 
   const handleUpvote = () => setUpvotes(upvotes + 1);
   const handleDownvote = () => setDownvotes(downvotes + 1);
@@ -23,6 +36,8 @@ function Post({ post }) {
       setNewComment('');
     }
   };
+
+  const handleCommentChange = (e: ChangeEvent<HTMLInputElement>) => setNewComment(e.target.value);
 
   return (
     <div className="post">
@@ -44,16 +59,18 @@ function Post({ post }) {
       <div className="comments-section">
         <Input
           value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
+          onChange={handleCommentChange}
           placeholder="Add a comment..."
           onPressEnter={handleAddComment}
         />
         {comments.map((comment, index) => (
-          <Comment key={index} content={comment} />
+          <div key={index} className="comment">
+            {comment}
+          </div>
         ))}
       </div>
     </div>
   );
-}
+};
 
 export default Post;

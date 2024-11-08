@@ -1,7 +1,12 @@
-// src/components/ProtectedRoute.jsx
+// src/components/ProtectedRoute.tsx
 import { Navigate } from 'react-router-dom';
+import React from 'react';
 
-function ProtectedRoute({ children }) {
+interface ProtectedRouteProps {
+  children: React.ReactNode; // Define children as a ReactNode
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const token = localStorage.getItem('authToken'); // Check if token exists
 
   if (!token) {
@@ -10,7 +15,7 @@ function ProtectedRoute({ children }) {
   }
 
   // If token exists, render the child components (e.g., Home page)
-  return children;
-}
+  return <>{children}</>;
+};
 
 export default ProtectedRoute;
