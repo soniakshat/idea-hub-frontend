@@ -9,6 +9,17 @@ function Home() {
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Define colors for different statuses
+  const statusColors = {
+    "draft": "#A9A9A9",
+    "in review": "#FFD700",
+    "approved": "#32CD32",
+    "in development": "#1E90FF",
+    "testing": "#FF8C00",
+    "completed": "#4B0082",
+    "archived": "#808080"
+  };
+
   // Utility function to convert timestamp to a readable format
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -34,8 +45,8 @@ function Home() {
           },
         });
 
-        setPosts(response.data); // Store fetched posts
-        setFilteredPosts(response.data); // Initialize filtered posts with all posts
+        setPosts(response.data);
+        setFilteredPosts(response.data);
       } catch (error) {
         console.error('Error fetching posts:', error);
       } finally {
@@ -53,7 +64,7 @@ function Home() {
         post.title.toLowerCase().includes(query.toLowerCase()) ||
         post.content.toLowerCase().includes(query.toLowerCase())
     );
-    setFilteredPosts(filtered); // Update filtered posts based on query
+    setFilteredPosts(filtered);
   };
 
   // Handle upvote toggle
@@ -66,7 +77,7 @@ function Home() {
       updatedPosts[index] = {
         ...updatedPosts[index],
         upvotes: response.data.upvotes,
-        isUpvoted: !isUpvoted, // Toggle isUpvoted state
+        isUpvoted: !isUpvoted,
       };
       setFilteredPosts(updatedPosts);
     } catch (error) {
@@ -84,7 +95,7 @@ function Home() {
       updatedPosts[index] = {
         ...updatedPosts[index],
         downvotes: response.data.downvotes,
-        isDownvoted: !isDownvoted, // Toggle isUpvoted state
+        isDownvoted: !isDownvoted,
       };
       setFilteredPosts(updatedPosts);
     } catch (error) {
@@ -134,7 +145,7 @@ function Home() {
                       padding: '4px 8px',
                       borderRadius: '4px',
                       fontSize: '0.8rem',
-                      backgroundColor: '#4caf50',
+                      backgroundColor: statusColors[post.status?.toLowerCase()] || '#000000', // Convert status to lowercase
                       color: 'white',
                     }}
                   >
