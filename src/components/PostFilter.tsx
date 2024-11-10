@@ -7,9 +7,11 @@ interface PostFilterProps {
   tags: string[];
   businesses: string[];
   onApplyFilters: (selectedTags: string[], selectedBusinesses: string[]) => void;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
 }
 
-const PostFilter: React.FC<PostFilterProps> = ({ tags, businesses, onApplyFilters }) => {
+const PostFilter: React.FC<PostFilterProps> = ({ tags, businesses, onApplyFilters, isExpanded, onToggleExpand }) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedBusinesses, setSelectedBusinesses] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -42,6 +44,8 @@ const PostFilter: React.FC<PostFilterProps> = ({ tags, businesses, onApplyFilter
   const filteredBusinesses = businesses.filter((business) =>
     business.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (!isExpanded) return null; // Render nothing if the filter is not expanded
 
   return (
     <div className="post-filter-container">

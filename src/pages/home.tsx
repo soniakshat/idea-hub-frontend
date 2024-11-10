@@ -75,7 +75,7 @@ function Home() {
   if (loading) {
     return (
       <>
-        <Navbar/>
+        <Navbar expandFilter={() => {}} />
         <Row gutter={[16, 16]} style={{ padding: '20px' }}>
           {Array.from({ length: 8 }).map((_, index) => (
             <Col key={index} xs={24} sm={12} md={8} lg={6}>

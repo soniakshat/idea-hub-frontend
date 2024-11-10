@@ -1,8 +1,8 @@
 // src/components/PostCard.tsx
 import React from 'react';
 import { Col } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
-import './PostCard.css';
+import { ArrowUpOutlined, ArrowDownOutlined , CommentOutlined} from '@ant-design/icons';
+import './PostCard.scss';
 import { Post } from '../types/Post';
 
 interface PostCardProps {
@@ -85,7 +85,7 @@ const PostCard: React.FC<PostCardProps> = ({
               {post.downvotes}
             </button>
           </div>
-          <div>{post.comments.length} comments</div>
+          <div><CommentOutlined/> {post.comments.length}</div>
         </footer>
       </article>
     </Col>

@@ -1,4 +1,3 @@
-// src/pages/CreatePost.tsx
 import React from 'react';
 import { message } from 'antd';
 import API from '../api';
@@ -59,7 +58,7 @@ const CreatePost: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar expandFilter={() => {}} />
       <PostForm
         initialPost={{
           title: '',
