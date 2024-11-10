@@ -5,7 +5,7 @@ import API from '../api'; // Axios instance
 import { Button, Input, Form, message, Typography, Card } from 'antd';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserOutlined, MailOutlined, LockOutlined, TeamOutlined } from '@ant-design/icons';
-import './auth.css';
+import './auth.scss';
 
 const { Title, Text } = Typography;
 
