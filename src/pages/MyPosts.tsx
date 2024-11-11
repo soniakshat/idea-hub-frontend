@@ -1,9 +1,9 @@
 // src/pages/MyPosts.tsx
 import React, { useEffect, useState } from 'react';
 import API from '../api';
-import Navbar from '../components/Navbar.tsx';
-import PostCard from '../components/PostCard.tsx';
-import PostFilter from '../components/PostFilter.tsx'; // Import PostFilter component
+import Navbar from './../components/Navbar.tsx';
+import PostCard from './../components/PostCard.tsx';
+import PostFilter from './../components/PostFilter.tsx'; // Import PostFilter component
 import { Skeleton, Row, Col } from 'antd';
 import { formatDate, getLocalStorageItem } from '../utils/utils';
 import { handleSearch, handleUpvote, handleDownvote } from '../utils/postActions';

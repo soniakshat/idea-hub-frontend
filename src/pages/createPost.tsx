@@ -2,8 +2,8 @@ import React from 'react';
 import { message } from 'antd';
 import API from '../api';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar.tsx';
-import PostForm from '../components/PostForm.tsx';
+import Navbar from './../components/Navbar.tsx';
+import PostForm from './../components/PostForm.tsx';
 import { formatDate, generateUniqueId, parseCommaSeparatedValues, getLocalStorageItem } from '../utils/utils';
 
 interface Post {
