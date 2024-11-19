@@ -1,11 +1,11 @@
 // src/pages/login.tsx
-import React from 'react';
-import { useState, ChangeEvent } from 'react';
-import API from '../api';
-import { Button, Input, Form, message, Typography, Card } from 'antd';
-import { useNavigate, Link } from 'react-router-dom';
-import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import './auth.scss';
+import React from "react";
+import { useState, ChangeEvent } from "react";
+import API from "../api";
+import { Button, Input, Form, message, Typography, Card } from "antd";
+import { useNavigate, Link } from "react-router-dom";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
+import "./auth.scss";
 
 const { Title, Text } = Typography;
 
@@ -15,7 +15,10 @@ interface Credentials {
 }
 
 const Login: React.FC = () => {
-  const [credentials, setCredentials] = useState<Credentials>({ email: '', password: '' });
+  const [credentials, setCredentials] = useState<Credentials>({
+    email: "",
+    password: "",
+  });
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -28,37 +31,40 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      console.log('Sending credentials:', credentials);
+      console.log("Sending credentials:", credentials);
 
       const response = await API.post(
-        '/user/login',
+        "/user/login",
         {
           email: credentials.email,
           password: credentials.password,
         },
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
 
-      console.log('API Response:', response);
+      console.log("API Response:", response);
 
       if (response.status === 200) {
-        const { token, name, id } = response.data;
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('userId', id);
-        localStorage.setItem('userName', name);
+        const { token, name, id, is_admin } = response.data;
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("userId", id);
+        localStorage.setItem("userName", name);
+        localStorage.setItem("is_admin", is_admin);
+        console.log("ADMIN: ", is_admin);
         message.success(`Welcome, ${name}! Redirecting to home page...`);
-        navigate('/home');
+        navigate("/home");
       } else {
-        throw new Error('Invalid response status: ' + response.status);
+        throw new Error("Invalid response status: " + response.status);
       }
     } catch (error: any) {
-      console.error('Login failed:', error.response?.data || error);
+      console.error("Login failed:", error.response?.data || error);
       const errorMessage =
-        error.response?.data?.message || 'Invalid email or password. Please try again.';
+        error.response?.data?.message ||
+        "Invalid email or password. Please try again.";
       message.error(errorMessage);
     } finally {
       setLoading(false);
@@ -79,8 +85,8 @@ const Login: React.FC = () => {
           <Form.Item
             name="email"
             rules={[
-              { required: true, message: 'Please enter your email!' },
-              { type: 'email', message: 'Please enter a valid email!' },
+              { required: true, message: "Please enter your email!" },
+              { type: "email", message: "Please enter a valid email!" },
             ]}
           >
             <Input
@@ -92,7 +98,7 @@ const Login: React.FC = () => {
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[{ required: true, message: 'Please enter your password!' }]}
+            rules={[{ required: true, message: "Please enter your password!" }]}
           >
             <Input.Password
               name="password"
@@ -110,7 +116,7 @@ const Login: React.FC = () => {
             Log In
           </Button>
         </Form>
-        <div style={{ marginTop: '10px', textAlign: 'center' }}>
+        <div style={{ marginTop: "10px", textAlign: "center" }}>
           <Text>Don't have an account? </Text>
           <Link to="/signup">Sign up</Link>
         </div>
