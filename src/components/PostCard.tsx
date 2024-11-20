@@ -1,9 +1,10 @@
-// src/components/PostCard.tsx
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Col } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined , CommentOutlined} from '@ant-design/icons';
+import { ArrowUpOutlined, ArrowDownOutlined, CommentOutlined } from '@ant-design/icons';
 import './PostCard.scss';
 import { Post } from '../types/Post';
+import PostDetailPopup from './PostDetailPopup';
 
 interface PostCardProps {
   post: Post;
@@ -22,73 +23,102 @@ const PostCard: React.FC<PostCardProps> = ({
   handleUpvote,
   handleDownvote,
 }) => {
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
+  const handleCardClick = () => {
+    setIsPopupVisible(true);
+  };
+
+  const handlePopupClose = () => {
+    setIsPopupVisible(false);
+  };
+
+  const handleCommentSubmit = (comment: string) => {
+    console.log('New Comment:', comment); // Replace with actual logic to add a comment
+  };
+
   const filteredTags = post.tags?.filter((tag) => tag.trim() !== '') || [];
   const filteredBusiness = post.business?.filter((businessTag) => businessTag.trim() !== '') || [];
 
   return (
-    <Col key={post.id} xs={24} sm={12} md={8} lg={6}>
-      <article className="post-card">
-        <header className="post-card-header">
-          <div>
-            <h2 className="post-card-title">{post.title}</h2>
-            <div className="post-card-date">
-              <time dateTime={post.timestamp}>{formatDate(post.timestamp)}</time>
+    <>
+      <Col key={post.id} xs={24} sm={12} md={8} lg={6}>
+        <article className="post-card" onClick={handleCardClick}>
+          <header className="post-card-header">
+            <div>
+              <h2 className="post-card-title">{post.title}</h2>
+              <div className="post-card-date">
+                <time dateTime={post.timestamp}>{formatDate(post.timestamp)}</time>
+              </div>
             </div>
-          </div>
-          <span
-            className="post-card-status"
-            style={{ backgroundColor: statusColors[post.status?.toLowerCase()] || '#000000' }}
-          >
-            {post.status}
-          </span>
-        </header>
-
-        <div className="post-card-author">
-          <div className="post-card-author-avatar">{post.author.name[0]}</div>
-          <span>{post.author.name}</span>
-        </div>
-
-        <div className="post-card-content">{post.content}</div>
-
-        <div className="post-card-tags">
-          {filteredTags.map((tag, index) => (
-                <span key={index} className="post-card-tag">
-                  {tag}
-                </span>
-              ))}
-
-          {filteredBusiness.map((businessTag, index) => (
-            <span key={index} className="post-card-business">
-              {businessTag}
+            <span
+              className="post-card-status"
+              style={{ backgroundColor: statusColors[post.status?.toLowerCase()] || '#000000' }}
+            >
+              {post.status}
             </span>
-          ))}
-        </div>
+          </header>
 
-        <footer className="post-card-footer">
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <button
-              className="post-card-vote-btn"
-              onClick={() => handleUpvote(post.id, post.isUpvoted, index)}
-            >
-              <ArrowUpOutlined
-                className={`post-card-vote-icon ${post.isUpvoted ? 'post-card-vote-icon-upvoted' : ''}`}
-              />
-              {post.upvotes}
-            </button>
-            <button
-              className="post-card-vote-btn"
-              onClick={() => handleDownvote(post.id, post.isDownvoted, index)}
-            >
-              <ArrowDownOutlined
-                className={`post-card-vote-icon ${post.isDownvoted ? 'post-card-vote-icon-downvoted' : ''}`}
-              />
-              {post.downvotes}
-            </button>
+          <div className="post-card-author">
+            <div className="post-card-author-avatar">{post.author.name[0]}</div>
+            <span>{post.author.name}</span>
           </div>
-          <div><CommentOutlined/> {post.comments.length}</div>
-        </footer>
-      </article>
-    </Col>
+
+          <div className="post-card-content">{post.content}</div>
+
+          <div className="post-card-tags">
+            {filteredTags.map((tag, index) => (
+              <span key={index} className="post-card-tag">
+                {tag}
+              </span>
+            ))}
+
+            {filteredBusiness.map((businessTag, index) => (
+              <span key={index} className="post-card-business">
+                {businessTag}
+              </span>
+            ))}
+          </div>
+
+          <footer className="post-card-footer">
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <button
+                className="post-card-vote-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpvote(post.id, post.isUpvoted, index);
+                }}
+              >
+                <ArrowUpOutlined
+                  className={`post-card-vote-icon ${post.isUpvoted ? 'post-card-vote-icon-upvoted' : ''}`}
+                />
+                {post.upvotes}
+              </button>
+              <button
+                className="post-card-vote-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownvote(post.id, post.isDownvoted, index);
+                }}
+              >
+                <ArrowDownOutlined
+                  className={`post-card-vote-icon ${post.isDownvoted ? 'post-card-vote-icon-downvoted' : ''}`}
+                />
+                {post.downvotes}
+              </button>
+            </div>
+            <div><CommentOutlined /> {post.comments.length}</div>
+          </footer>
+        </article>
+      </Col>
+
+      <PostDetailPopup
+        visible={isPopupVisible}
+        post={post}
+        onClose={handlePopupClose}
+        onCommentSubmit={handleCommentSubmit}
+      />
+    </>
   );
 };
 
