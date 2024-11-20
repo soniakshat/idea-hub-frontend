@@ -14,6 +14,9 @@ interface PostCardProps {
   index: number;
   statusColors: Record<string, string>;
   formatDate: (timestamp: string) => string;
+  handleUpvote: () => Promise<void>; // Add this
+  handleDownvote: () => Promise<void>; // Add this
+  onDelete: (deletedPostId: string) => void; // Add delete callback
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -21,6 +24,7 @@ const PostCard: React.FC<PostCardProps> = ({
   index,
   statusColors,
   formatDate,
+  onDelete, // Receive delete callback
 }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [currentPost, setCurrentPost] = useState(post);
@@ -105,6 +109,12 @@ const PostCard: React.FC<PostCardProps> = ({
       console.error("Error during downvote:", error);
       message.error("Failed to downvote");
     }
+  };
+
+  const handleDelete = (deletedPostId: string) => {
+    onDelete(deletedPostId); // Notify parent component about the deletion
+    setIsPopupVisible(false); // Close the popup
+    message.success("Post deleted successfully!");
   };
 
   const filteredTags =
@@ -207,6 +217,7 @@ const PostCard: React.FC<PostCardProps> = ({
         post={currentPost}
         onClose={handlePopupClose}
         onCommentSubmit={handleCommentSubmit}
+        onDelete={handleDelete} // Pass delete handler to popup
       />
     </>
   );

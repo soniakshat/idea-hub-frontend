@@ -1,10 +1,9 @@
-// src/pages/Home.tsx
 import React, { useEffect, useState } from "react";
 import API from "../api";
 import Navbar from "./../components/Navbar.tsx";
 import PostCard from "./../components/PostCard.tsx";
 import PostFilter from "./../components/PostFilter.tsx";
-import { Skeleton, Row, Col } from "antd";
+import { Skeleton, Row, Col, message } from "antd";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import {
   handleSearch,
@@ -60,6 +59,7 @@ function Home() {
         setAvailableBusinesses(businesses);
       } catch (error) {
         console.error("Error fetching posts:", error);
+        message.error("Failed to load posts");
       } finally {
         setLoading(false);
       }
@@ -87,6 +87,16 @@ function Home() {
             )))
     );
     setFilteredPosts(filtered);
+  };
+
+  const handlePostDelete = (deletedPostId: string) => {
+    setPosts((prevPosts) =>
+      prevPosts.filter((post) => post._id !== deletedPostId)
+    );
+    setFilteredPosts((prevFilteredPosts) =>
+      prevFilteredPosts.filter((post) => post._id !== deletedPostId)
+    );
+    message.success("Post deleted successfully!");
   };
 
   if (loading) {
@@ -154,6 +164,7 @@ function Home() {
                   setFilteredPosts
                 )
               }
+              onDelete={handlePostDelete} // Pass post deletion handler to PostCard
             />
           ))}
         </Row>

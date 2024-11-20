@@ -10,6 +10,7 @@ interface PostDetailPopupProps {
   post: Post;
   onClose: () => void;
   onCommentSubmit: (updatedPost: Post) => void;
+  onDelete: (deletedPostId: string) => void; // Added delete callback
 }
 
 const statusColors: Record<string, string> = {
@@ -27,6 +28,7 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
   post,
   onClose,
   onCommentSubmit,
+  onDelete, // Added delete callback
 }) => {
   const [comment, setComment] = useState<string>("");
   const [comments, setComments] = useState(post.comments);
@@ -117,7 +119,8 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
       }
 
       message.success("Post deleted successfully!");
-      onClose();
+      onDelete(post._id); // Notify parent component about the deletion
+      onClose(); // Close the popup
     } catch (error) {
       console.error("Error deleting post:", error);
       message.error("Failed to delete post");
