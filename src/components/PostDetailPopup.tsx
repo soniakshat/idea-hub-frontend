@@ -1,127 +1,246 @@
-import React from "react";
-import { Modal, Button, Input } from "antd";
+import React, { useState } from "react";
+import { Modal, Input, Tag, message, Popconfirm, Button, Tooltip } from "antd";
+import { EditOutlined, DeleteOutlined, SendOutlined } from "@ant-design/icons";
 import { Post } from "../types/Post";
+import { formatDate, getLocalStorageItem } from "../utils/utils";
 import "./PostDetailPopup.scss";
-import { getLocalStorageItem } from "../utils/utils";
 
 interface PostDetailPopupProps {
   visible: boolean;
   post: Post;
   onClose: () => void;
-  onCommentSubmit: (comment: string) => void;
-  showButton?: boolean; // New prop to control button visibility
+  onCommentSubmit: (updatedPost: Post) => void;
 }
+
+const statusColors: Record<string, string> = {
+  draft: "#4D4D4D", // Dark gray: Represents unfinished, neutral state.
+  "in review": "#B47300", // Amber: Caution, reflects evaluation or pending action.
+  approved: "#1B5E20", // Dark green: Positivity, success, and approval.
+  "in development": "#004B8D", // Navy blue: Progress, professional, and active work.
+  testing: "#8B4500", // Brownish orange: Critical stage and focus on finding errors.
+  completed: "#4A0072", // Deep purple: Finality and elegance for completed tasks.
+  archived: "#5D4037", // Earthy brown: Historical, inactive, and stored items.
+};
 
 const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
   visible,
   post,
   onClose,
   onCommentSubmit,
-  showButton = getLocalStorageItem("is_moderator") ||
-    post.author.id == getLocalStorageItem("userId"),
 }) => {
-  // console.log(
-  //   "Show Button: ",
-  //   showButton,
-  //   "   is post ",
-  //   post.title,
-  //   " by me? ",
-  //   post.author.id == getLocalStorageItem("userId")
-  // );
-  const [comment, setComment] = React.useState("");
-  const handleCommentSubmit = () => {
+  const [comment, setComment] = useState<string>("");
+  const [comments, setComments] = useState(post.comments);
+
+  const showButton =
+    getLocalStorageItem("is_moderator") === "true" ||
+    post.author.id === getLocalStorageItem("userId");
+
+  const handleCommentSubmit = async () => {
     if (comment.trim()) {
-      onCommentSubmit(comment);
-      setComment(""); // Clear the comment input
+      try {
+        const token = getLocalStorageItem("authToken");
+        if (!token) {
+          message.error("Authentication required!");
+          return;
+        }
+
+        const userId = getLocalStorageItem("userId");
+        const userName = getLocalStorageItem("userName");
+
+        if (!userId || !userName) {
+          message.error("User information is missing!");
+          return;
+        }
+
+        const response = await fetch(
+          `https://api.techqubits.com/api/posts/addComment/${post._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              id: userId,
+              author: userName,
+              content: comment,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to add comment");
+        }
+
+        const newComment = {
+          id: userId,
+          author: userName,
+          content: comment,
+          timestamp: new Date().toISOString(),
+        };
+
+        setComments((prevComments) => [...prevComments, newComment]);
+        setComment("");
+        message.success("Comment added successfully!");
+
+        onCommentSubmit({
+          ...post,
+          comments: [...comments, newComment],
+        });
+      } catch (error) {
+        console.error("Error adding comment:", error);
+        message.error("Failed to add comment");
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      const token = getLocalStorageItem("authToken");
+      if (!token) {
+        message.error("Authentication required!");
+        return;
+      }
+
+      const response = await fetch(
+        `https://api.techqubits.com/api/posts/${post._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete post");
+      }
+
+      message.success("Post deleted successfully!");
+      onClose();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      message.error("Failed to delete post");
     }
   };
 
   const handleEdit = () => {
-    console.log("Edit Post:", post.id); // Placeholder for edit functionality
-  };
-
-  const handleDelete = () => {
-    console.log("Delete Post:", post.id); // Placeholder for delete functionality
+    message.info("Edit functionality coming soon!");
   };
 
   return (
     <Modal
-      title={post.title}
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={700}
+      width="80%"
+      bodyStyle={{
+        maxHeight: "85vh",
+        overflowY: "auto",
+        padding: "16px",
+      }}
+      style={{
+        top: 20,
+        maxWidth: "90%",
+      }}
     >
-      <div className="post-detail-popup-content">
-        <section>
-          <h3>Details</h3>
-          <p>{post.content}</p>
-        </section>
-
-        <section>
-          <h4>Comments</h4>
-          <div
-            className="post-detail-comments"
-            style={{
-              marginBottom: "16px",
-              maxHeight: "200px",
-              overflowY: "auto",
-              border: "1px solid #ccc",
-              padding: "8px",
-            }}
-          >
-            {post.comments.length === 0 ? (
-              <div>No comments yet..!!</div>
-            ) : (
-              post.comments.map((c, idx) => (
-                <div key={idx} className="comment-item">
-                  <strong>{c.author}</strong>: {c.content}
-                </div>
-              ))
-            )}
-          </div>
-          <div className="add-comment">
-            <Input.TextArea
-              rows={2}
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Add a comment..."
-            />
-          </div>
-        </section>
-        <div
-          className="post-detail-actions"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-          }}
-        >
+      <div>
+        <header className="post-card-header">
           <div>
-            {showButton && (
+            <h2 className="post-card-title">{post.title}</h2>
+            <p className="post-card-date">{formatDate(post.timestamp)}</p>
+            <Tag
+              className="post-card-status"
+              style={{
+                backgroundColor:
+                  statusColors[post.status.toLowerCase()] || "#4D4D4D",
+                color: "#fff",
+              }}
+            >
+              {post.status}
+            </Tag>
+          </div>
+        </header>
+
+        <div className="post-card-author">
+          <div className="post-card-author-avatar">{post.author.name[0]}</div>
+          <span>{post.author.name}</span>
+        </div>
+
+        <div className="post-card-content">{post.content}</div>
+
+        <div className="post-card-tags">
+          <div>
+            {post.tags?.map((tag, index) => (
+              <Tag color="blue" key={index}>
+                {tag}
+              </Tag>
+            ))}
+            {post.business?.map((business, index) => (
+              <Tag color="green" key={index}>
+                {business}
+              </Tag>
+            ))}
+          </div>
+        </div>
+        <h4>Comments</h4>
+        <div className="post-detail-comments">
+          {comments.length === 0 ? (
+            <div>No comments yet..!!</div>
+          ) : (
+            <div className="comment-list">
+              {comments.map((c, idx) => (
+                <div key={idx} className="comment-item">
+                  <strong>{c.author}</strong>
+                  {c.content}
+                  <div className="comment-timestamp">
+                    {formatDate(c.timestamp)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <br />
+        <div className="add-comment">
+          <Input.TextArea
+            rows={2}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Add a comment..."
+          />
+          <Tooltip title="Submit Comment">
+            <Button
+              type="primary"
+              icon={<SendOutlined />}
+              onClick={handleCommentSubmit}
+              disabled={!comment.trim()}
+            />
+          </Tooltip>
+        </div>
+        <br />
+
+        {showButton && (
+          <footer className="post-card-footer">
+            <Tooltip title="Edit Post">
               <Button
                 type="primary"
+                icon={<EditOutlined />}
                 onClick={handleEdit}
-                style={{ marginRight: "8px" }}
+              />
+            </Tooltip>
+            <Tooltip title="Delete Post">
+              <Popconfirm
+                title="Are you sure you want to delete this post?"
+                onConfirm={handleDelete}
+                okText="Yes"
+                cancelText="No"
               >
-                Edit
-              </Button>
-            )}
-            {showButton && (
-              <Button type="primary" onClick={handleDelete}>
-                Delete
-              </Button>
-            )}
-          </div>
-          <Button
-            type="primary"
-            onClick={handleCommentSubmit}
-            style={{ marginLeft: "8px" }}
-          >
-            Submit
-          </Button>
-        </div>
+                <Button danger icon={<DeleteOutlined />} />
+              </Popconfirm>
+            </Tooltip>
+          </footer>
+        )}
       </div>
     </Modal>
   );
