@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Switch, message } from "antd";
+import { Table, Switch, message, Popconfirm, Button, Result } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 import { getLocalStorageItem } from "../utils/utils";
+import { useNavigate } from "react-router-dom";
 
 interface User {
   _id: string;
@@ -8,21 +10,19 @@ interface User {
   email: string;
   department: string;
   is_moderator: boolean;
+  is_admin?: boolean;
 }
 
 const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   // Check if the user is an admin
   const checkAdminStatus = () => {
     const isAdminValue = getLocalStorageItem("is_admin");
-    if (isAdminValue === "true") {
-      setIsAdmin(true);
-    } else {
-      setIsAdmin(false);
-    }
+    setIsAdmin(isAdminValue === "true");
   };
 
   // Fetch users from the API
@@ -47,7 +47,9 @@ const Admin: React.FC = () => {
       }
 
       const data = await response.json();
-      setUsers(data.users || []);
+      // Exclude admin users
+      const nonAdminUsers = data.users.filter((user: User) => !user.is_admin);
+      setUsers(nonAdminUsers || []);
       message.success("Users fetched successfully");
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -96,6 +98,38 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Delete user
+  const deleteUser = async (userId: string) => {
+    try {
+      const token = getLocalStorageItem("authToken");
+      if (!token) {
+        console.error("Authorization token is missing.");
+        return;
+      }
+      const response = await fetch(
+        `https://api.techqubits.com/user/${userId}/`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete user");
+      }
+
+      // Update the local state
+      setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
+      message.success("User deleted successfully");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      message.error("Failed to delete user");
+    }
+  };
+
   useEffect(() => {
     checkAdminStatus();
   }, []);
@@ -133,20 +167,53 @@ const Admin: React.FC = () => {
         />
       ),
     },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: User) => (
+        <Popconfirm
+          title="Are you sure you want to delete this user?"
+          onConfirm={() => deleteUser(record._id)}
+          okText="Yes"
+          cancelText="No"
+        >
+          <Button type="text" icon={<DeleteOutlined />} danger />
+        </Popconfirm>
+      ),
+    },
   ];
 
   if (!isAdmin) {
     return (
       <div style={{ padding: "20px", textAlign: "center" }}>
-        <h1>Access Denied</h1>
-        <p>You are not authorized to view this page.</p>
+        <Result
+          status="403"
+          title="Access Denied"
+          subTitle="Sorry, you are not authorized to view this page."
+          extra={
+            <Button type="primary" onClick={() => navigate("/home")}>
+              Go to Home
+            </Button>
+          }
+        />
       </div>
     );
   }
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Admin Panel</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "20px",
+        }}
+      >
+        <h1>Admin Panel</h1>
+        <Button type="primary" onClick={() => navigate("/home")}>
+          Go to Home
+        </Button>
+      </div>
       <Table
         dataSource={users}
         columns={columns}

@@ -1,16 +1,24 @@
-// src/components/Navbar.tsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Input, Button } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import './Navbar.scss';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Input, Tooltip, Button } from "antd";
+import {
+  SearchOutlined,
+  FilterOutlined,
+  UserOutlined,
+  PlusOutlined,
+  LogoutOutlined,
+  CrownOutlined,
+} from "@ant-design/icons";
+import "./Navbar.scss";
 
 interface NavbarProps {
-   onSearch?: (query: string) => void;
-   expandFilter: () => void; // Add expandFilter to NavbarProps
+  onSearch?: (query: string) => void;
+  expandFilter: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
+  const isAdmin = localStorage.getItem("is_admin") === "true";
+
   return (
     <div className="navbar">
       {/* Left Section: Logo */}
@@ -34,29 +42,55 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
 
       {/* Right Section: Buttons */}
       <div className="navbar-right">
-        <Button type="link" className="filter-btn" onClick={expandFilter}>
-          Filters
-        </Button>
-        <Link to="/myposts">
-          <Button type="primary" className="login-btn">
-            My Posts
-          </Button>
-        </Link>
-        <Link to="/create-post">
-          <Button type="primary" className="login-btn">
-            Create Post
-          </Button>
-        </Link>
-        <Button
-          type="primary"
-          danger
-          onClick={() => {
-            localStorage.removeItem('authToken');
-            window.location.href = '/login';
-          }}
-        >
-          Logout
-        </Button>
+        {/* Admin Panel Button */}
+        {isAdmin && (
+          <Tooltip title="Admin Panel">
+            <Link to="/admin">
+              <Button
+                type="primary"
+                icon={<CrownOutlined />}
+                className="admin-btn"
+              />
+            </Link>
+          </Tooltip>
+        )}
+        <Tooltip title="Filters">
+          <Button
+            type="link"
+            icon={<FilterOutlined />}
+            className="filter-btn"
+            onClick={expandFilter}
+          />
+        </Tooltip>
+        <Tooltip title="My Posts">
+          <Link to="/myposts">
+            <Button
+              type="primary"
+              icon={<UserOutlined />}
+              className="my-posts-btn"
+            />
+          </Link>
+        </Tooltip>
+        <Tooltip title="Create Post">
+          <Link to="/create-post">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              className="create-post-btn"
+            />
+          </Link>
+        </Tooltip>
+        <Tooltip title="Logout">
+          <Button
+            type="primary"
+            danger
+            icon={<LogoutOutlined />}
+            onClick={() => {
+              localStorage.removeItem("authToken");
+              window.location.href = "/login";
+            }}
+          />
+        </Tooltip>
       </div>
     </div>
   );

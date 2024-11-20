@@ -49,11 +49,12 @@ const Login: React.FC = () => {
       console.log("API Response:", response);
 
       if (response.status === 200) {
-        const { token, name, id, is_admin } = response.data;
+        const { token, name, id, is_admin, is_moderator } = response.data;
         localStorage.setItem("authToken", token);
         localStorage.setItem("userId", id);
         localStorage.setItem("userName", name);
         localStorage.setItem("is_admin", is_admin);
+        localStorage.setItem("is_moderator", is_moderator);
         console.log("ADMIN: ", is_admin);
         message.success(`Welcome, ${name}! Redirecting to home page...`);
         navigate("/home");

@@ -1,8 +1,8 @@
-
-import React from 'react';
-import { Modal, Button, Input } from 'antd';
-import { Post } from '../types/Post';
-import './PostDetailPopup.scss';
+import React from "react";
+import { Modal, Button, Input } from "antd";
+import { Post } from "../types/Post";
+import "./PostDetailPopup.scss";
+import { getLocalStorageItem } from "../utils/utils";
 
 interface PostDetailPopupProps {
   visible: boolean;
@@ -17,37 +17,42 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
   post,
   onClose,
   onCommentSubmit,
-  showButton = true, // Default to true
-  // showButton = false,
-
+  showButton = getLocalStorageItem("is_moderator") ||
+    post.author.id == getLocalStorageItem("userId"),
 }) => {
-  const [comment, setComment] = React.useState('');
-
+  // console.log(
+  //   "Show Button: ",
+  //   showButton,
+  //   "   is post ",
+  //   post.title,
+  //   " by me? ",
+  //   post.author.id == getLocalStorageItem("userId")
+  // );
+  const [comment, setComment] = React.useState("");
   const handleCommentSubmit = () => {
     if (comment.trim()) {
       onCommentSubmit(comment);
-      setComment(''); // Clear the comment input
+      setComment(""); // Clear the comment input
     }
   };
 
   const handleEdit = () => {
-    console.log('Edit Post:', post.id); // Placeholder for edit functionality
+    console.log("Edit Post:", post.id); // Placeholder for edit functionality
   };
 
   const handleDelete = () => {
-    console.log('Delete Post:', post.id); // Placeholder for delete functionality
+    console.log("Delete Post:", post.id); // Placeholder for delete functionality
   };
 
   return (
     <Modal
       title={post.title}
-      visible={visible}
+      open={visible}
       onCancel={onClose}
       footer={null}
       width={700}
     >
       <div className="post-detail-popup-content">
-
         <section>
           <h3>Details</h3>
           <p>{post.content}</p>
@@ -55,7 +60,16 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
 
         <section>
           <h4>Comments</h4>
-          <div className="post-detail-comments" style={{ marginBottom: '16px', maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '8px' }}>
+          <div
+            className="post-detail-comments"
+            style={{
+              marginBottom: "16px",
+              maxHeight: "200px",
+              overflowY: "auto",
+              border: "1px solid #ccc",
+              padding: "8px",
+            }}
+          >
             {post.comments.length === 0 ? (
               <div>No comments yet..!!</div>
             ) : (
@@ -75,10 +89,22 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
             />
           </div>
         </section>
-        <div className="post-detail-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div
+          className="post-detail-actions"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "16px",
+          }}
+        >
           <div>
             {showButton && (
-              <Button type="primary" onClick={handleEdit} style={{ marginRight: '8px' }}>
+              <Button
+                type="primary"
+                onClick={handleEdit}
+                style={{ marginRight: "8px" }}
+              >
                 Edit
               </Button>
             )}
@@ -88,7 +114,11 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
               </Button>
             )}
           </div>
-          <Button type="primary" onClick={handleCommentSubmit} style={{ marginLeft: '8px' }}>
+          <Button
+            type="primary"
+            onClick={handleCommentSubmit}
+            style={{ marginLeft: "8px" }}
+          >
             Submit
           </Button>
         </div>
