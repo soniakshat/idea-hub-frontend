@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Col } from "antd";
+import { Col, message } from "antd";
 import {
   ArrowUpOutlined,
   ArrowDownOutlined,
@@ -14,8 +14,6 @@ interface PostCardProps {
   index: number;
   statusColors: Record<string, string>;
   formatDate: (timestamp: string) => string;
-  handleUpvote: (postId: string, isUpvoted: boolean, index: number) => void;
-  handleDownvote: (postId: string, isDownvoted: boolean, index: number) => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -23,8 +21,6 @@ const PostCard: React.FC<PostCardProps> = ({
   index,
   statusColors,
   formatDate,
-  handleUpvote,
-  handleDownvote,
 }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [currentPost, setCurrentPost] = useState(post);
@@ -39,6 +35,76 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const handleCommentSubmit = (updatedPost: Post) => {
     setCurrentPost(updatedPost); // Update the post with the new comments
+  };
+
+  const handleUpvote = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        message.error("Authentication required!");
+        return;
+      }
+
+      const response = await fetch(
+        `https://api.techqubits.com/api/posts/${currentPost._id}/upvote`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ increment: 1 }), // Upvote by 1
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to upvote:", errorData);
+        throw new Error("Failed to upvote");
+      }
+
+      const updatedPost = await response.json();
+      setCurrentPost(updatedPost); // Update post with the new upvote count
+      message.success("Successfully upvoted!");
+    } catch (error) {
+      console.error("Error during upvote:", error);
+      message.error("Failed to upvote");
+    }
+  };
+
+  const handleDownvote = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        message.error("Authentication required!");
+        return;
+      }
+
+      const response = await fetch(
+        `https://api.techqubits.com/api/posts/${currentPost._id}/downvote`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ increment: 1 }), // Downvote by 1
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to downvote:", errorData);
+        throw new Error("Failed to downvote");
+      }
+
+      const updatedPost = await response.json();
+      setCurrentPost(updatedPost); // Update post with the new downvote count
+      message.success("Successfully downvoted!");
+    } catch (error) {
+      console.error("Error during downvote:", error);
+      message.error("Failed to downvote");
+    }
   };
 
   const filteredTags =
@@ -100,12 +166,14 @@ const PostCard: React.FC<PostCardProps> = ({
                 className="post-card-vote-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleUpvote(currentPost.id, currentPost.isUpvoted, index);
+                  handleUpvote();
                 }}
               >
                 <ArrowUpOutlined
                   className={`post-card-vote-icon ${
-                    currentPost.isUpvoted ? "post-card-vote-icon-upvoted" : ""
+                    currentPost.isUpvoted
+                      ? "post-card-vote-icon-upvoted"
+                      : "post-card-vote-icon-upvoted"
                   }`}
                 />
                 {currentPost.upvotes}
@@ -114,18 +182,14 @@ const PostCard: React.FC<PostCardProps> = ({
                 className="post-card-vote-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDownvote(
-                    currentPost.id,
-                    currentPost.isDownvoted,
-                    index
-                  );
+                  handleDownvote();
                 }}
               >
                 <ArrowDownOutlined
                   className={`post-card-vote-icon ${
                     currentPost.isDownvoted
                       ? "post-card-vote-icon-downvoted"
-                      : ""
+                      : "post-card-vote-icon-downvoted"
                   }`}
                 />
                 {currentPost.downvotes}
