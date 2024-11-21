@@ -132,7 +132,6 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
   const handleEdit = () => {
     // message.info("Edit functionality coming soon!");
     navigate(`/edit/${post._id}`);
-
   };
 
   return (
@@ -182,7 +181,7 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
             </span>
           ))}
 
-          {post.tags?.map((businessTag, index) => (
+          {post.business?.map((businessTag, index) => (
             <span key={index} className="post-card-business">
               {businessTag}
             </span>

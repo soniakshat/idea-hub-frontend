@@ -171,11 +171,7 @@ const EditPost: React.FC = () => {
               Update Post
             </Button>
             &nbsp;&nbsp;&nbsp;
-            <Button
-              type="primary"
-              loading={loading}
-              onClick={() => navigate("/home")}
-            >
+            <Button type="primary" onClick={() => navigate("/home")}>
               Cancle Edit
             </Button>
           </Form.Item>
