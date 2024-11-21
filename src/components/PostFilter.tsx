@@ -1,20 +1,29 @@
 // src/components/PostFilter.tsx
 
-import React, { useState } from 'react';
-import './PostFilter.scss';
+import React, { useState } from "react";
+import "./PostFilter.scss";
 
 interface PostFilterProps {
   tags: string[];
   businesses: string[];
-  onApplyFilters: (selectedTags: string[], selectedBusinesses: string[]) => void;
+  onApplyFilters: (
+    selectedTags: string[],
+    selectedBusinesses: string[]
+  ) => void;
   isExpanded: boolean;
   onToggleExpand: () => void;
 }
 
-const PostFilter: React.FC<PostFilterProps> = ({ tags, businesses, onApplyFilters, isExpanded, onToggleExpand }) => {
+const PostFilter: React.FC<PostFilterProps> = ({
+  tags,
+  businesses,
+  onApplyFilters,
+  isExpanded,
+  onToggleExpand,
+}) => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedBusinesses, setSelectedBusinesses] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const handleTagChange = (tag: string) => {
     setSelectedTags((prev) =>
@@ -24,7 +33,9 @@ const PostFilter: React.FC<PostFilterProps> = ({ tags, businesses, onApplyFilter
 
   const handleBusinessChange = (business: string) => {
     setSelectedBusinesses((prev) =>
-      prev.includes(business) ? prev.filter((b) => b !== business) : [...prev, business]
+      prev.includes(business)
+        ? prev.filter((b) => b !== business)
+        : [...prev, business]
     );
   };
 
@@ -65,8 +76,8 @@ const PostFilter: React.FC<PostFilterProps> = ({ tags, businesses, onApplyFilter
       />
 
       <div className="filter-content">
+        <h3>Tags</h3>
         <div className="filter-section">
-          <h3>Tags</h3>
           {filteredTags.map((tag) => (
             <label key={tag}>
               <input
@@ -79,8 +90,8 @@ const PostFilter: React.FC<PostFilterProps> = ({ tags, businesses, onApplyFilter
           ))}
         </div>
 
+        <h3>Businesses</h3>
         <div className="filter-section">
-          <h3>Businesses</h3>
           {filteredBusinesses.map((business) => (
             <label key={business}>
               <input

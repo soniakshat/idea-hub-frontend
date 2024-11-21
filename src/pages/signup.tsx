@@ -1,6 +1,4 @@
-// src/pages/signup.tsx
-import React from "react";
-import { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
 import API from "../api"; // Axios instance
 import { Button, Input, Form, message, Typography, Card } from "antd";
 import { useNavigate, Link } from "react-router-dom";
@@ -19,6 +17,7 @@ interface UserData {
   name: string;
   email: string;
   password: string;
+  confirmPassword: string;
   department: string;
 }
 
@@ -27,6 +26,7 @@ const Signup: React.FC = () => {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     department: "",
   });
 
@@ -41,6 +41,11 @@ const Signup: React.FC = () => {
 
   // Handle form submission
   const handleSignup = async () => {
+    if (userData.password !== userData.confirmPassword) {
+      message.error("Passwords do not match!");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -121,6 +126,27 @@ const Signup: React.FC = () => {
               name="password"
               prefix={<LockOutlined />}
               placeholder="Password"
+              onChange={handleChange}
+            />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            rules={[
+              { required: true, message: "Please confirm your password!" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Passwords do not match!"));
+                },
+              }),
+            ]}
+          >
+            <Input.Password
+              name="confirmPassword"
+              prefix={<LockOutlined />}
+              placeholder="Confirm Password"
               onChange={handleChange}
             />
           </Form.Item>
