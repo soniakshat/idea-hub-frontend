@@ -4,6 +4,7 @@ import { EditOutlined, DeleteOutlined, SendOutlined } from "@ant-design/icons";
 import { Post } from "../types/Post";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import "./PostDetailPopup.scss";
+import { useNavigate } from "react-router-dom";
 
 interface PostDetailPopupProps {
   visible: boolean;
@@ -127,8 +128,11 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
     }
   };
 
+  const navigate = useNavigate();
   const handleEdit = () => {
-    message.info("Edit functionality coming soon!");
+    // message.info("Edit functionality coming soon!");
+    navigate(`/edit/${post._id}`);
+
   };
 
   return (
