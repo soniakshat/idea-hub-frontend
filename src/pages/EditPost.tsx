@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Tag, message, Select } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
+import Navbar from "./../components/Navbar.tsx";
 import { getLocalStorageItem } from "../utils/utils";
 const { Option } = Select;
 
@@ -56,20 +57,24 @@ const EditPost: React.FC = () => {
   const handleFormSubmit = async (values: any) => {
     try {
       setLoading(true);
-  
+
       const token = getLocalStorageItem("authToken");
       if (!token) {
         message.error("Authentication required!");
         return;
       }
-  
+
       // Transform tags and business fields to arrays
       const transformedValues = {
         ...values,
-        tags: values.tags ? values.tags.split(",").map((tag: string) => tag.trim()) : [],
-        business: values.business ? values.business.split(",").map((b: string) => b.trim()) : [],
+        tags: values.tags
+          ? values.tags.split(",").map((tag: string) => tag.trim())
+          : [],
+        business: values.business
+          ? values.business.split(",").map((b: string) => b.trim())
+          : [],
       };
-  
+
       const response = await fetch(
         `https://api.techqubits.com/api/posts/${postId}`,
         {
@@ -81,13 +86,13 @@ const EditPost: React.FC = () => {
           body: JSON.stringify(transformedValues),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to update post");
       }
-  
+
       message.success("Post updated successfully!");
-      navigate("/myposts"); // Redirect to "My Posts" after successful update
+      navigate("/home"); // Redirect to "My Posts" after successful update
     } catch (error) {
       console.error("Error updating post:", error);
       message.error("Failed to update post");
@@ -95,63 +100,88 @@ const EditPost: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   return (
-    
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px" }}>
-      <h2>Edit Post</h2>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleFormSubmit}
-        initialValues={{
-          title: "",
-          content: "",
-          tags: [],
-          business: [],
-        }}
-      >
-        <Form.Item
-          label="Title"
-          name="title"
-          rules={[{ required: true, message: "Please enter the title" }]}
+    <>
+      <Navbar expandFilter={() => {}} />
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px" }}>
+        <h1
+          style={{
+            fontSize: 20,
+            fontWeight: 600,
+            textAlign: "center",
+            marginBottom: 20,
+          }}
         >
-          <Input placeholder="Enter the title" />
-        </Form.Item>
-
-        <Form.Item
-          label="Content"
-          name="content"
-          rules={[{ required: true, message: "Please enter the content" }]}
+          Edit Post
+        </h1>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleFormSubmit}
+          initialValues={{
+            title: "",
+            content: "",
+            tags: [],
+            business: [],
+          }}
         >
-          <Input.TextArea rows={4} placeholder="Enter the content" />
-        </Form.Item>
-
-        <Form.Item label="Tags" name="tags">
-          <Input placeholder="Comma-separated tags (e.g., tag1, tag2)" />
-        </Form.Item>
-
-        <Form.Item label="Business" name="business">
-          <Input placeholder="Comma-separated business units" />
-        </Form.Item>
-
-        {/* Status field for moderators */}
-        {isModerator && (
-          <Form.Item label="Status" name="status">
-            <Select>
-              <Option value="draft">Draft</Option>
-              <Option value="published">Published</Option>
-            </Select>
+          <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Please enter the title" }]}
+          >
+            <Input placeholder="Enter the title" />
           </Form.Item>
-        )}
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            Update Post
-          </Button>
-        </Form.Item>
-      </Form>
-    </div>
+          <Form.Item
+            label="Content"
+            name="content"
+            rules={[{ required: true, message: "Please enter the content" }]}
+          >
+            <Input.TextArea rows={4} placeholder="Enter the content" />
+          </Form.Item>
+
+          <Form.Item label="Tags" name="tags">
+            <Input placeholder="Comma-separated tags (e.g., tag1, tag2)" />
+          </Form.Item>
+
+          <Form.Item label="Business" name="business">
+            <Input placeholder="Comma-separated business units" />
+          </Form.Item>
+
+          {/* Status field for moderators */}
+          {isModerator && (
+            <Form.Item label="Status" name="status">
+              <Select>
+                <Option value="draft">Draft</Option>
+                <Option value="in review">In Review</Option>
+                <Option value="approved">Approved</Option>
+                <Option value="in development">In Development</Option>
+                <Option value="testing">Testing</Option>
+                <Option value="completed">Completed</Option>
+                <Option value="archived">Archived</Option>
+                <Option value="published">Published</Option>
+              </Select>
+            </Form.Item>
+          )}
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading}>
+              Update Post
+            </Button>
+            &nbsp;&nbsp;&nbsp;
+            <Button
+              type="primary"
+              loading={loading}
+              onClick={() => navigate("/home")}
+            >
+              Cancle Edit
+            </Button>
+          </Form.Item>
+        </Form>
+      </div>
+    </>
   );
 };
 

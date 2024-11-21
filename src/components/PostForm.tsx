@@ -1,8 +1,8 @@
 // src/components/PostForm.tsx
 
-import React, { ChangeEvent, useState } from 'react';
-import { Button, Input, Form } from 'antd';
-import './PostForm.scss';
+import React, { ChangeEvent, useState } from "react";
+import { Button, Input, Form } from "antd";
+import "./PostForm.scss";
 
 interface Post {
   title: string;
@@ -20,7 +20,9 @@ interface PostFormProps {
 const PostForm: React.FC<PostFormProps> = ({ initialPost, onSubmit }) => {
   const [post, setPost] = useState<Post>(initialPost);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setPost((prev) => ({ ...prev, [name]: value }));
   };
@@ -74,7 +76,7 @@ const PostForm: React.FC<PostFormProps> = ({ initialPost, onSubmit }) => {
           />
         </Form.Item>
 
-        <Button type="primary" htmlType="submit" className="post-form-button">
+        <Button type="primary" htmlType="submit">
           Submit Post
         </Button>
       </Form>
