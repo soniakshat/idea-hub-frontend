@@ -156,16 +156,15 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
           <div>
             <h2 className="post-card-title">{post.title}</h2>
             <p className="post-card-date">{formatDate(post.timestamp)}</p>
-            <Tag
+            <span
               className="post-card-status"
               style={{
                 backgroundColor:
-                  statusColors[post.status.toLowerCase()] || "#4D4D4D",
-                color: "#fff",
+                  statusColors[post.status.toLowerCase()] || "#000000",
               }}
             >
               {post.status}
-            </Tag>
+            </span>
           </div>
         </header>
 
@@ -177,18 +176,17 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
         <div className="post-card-content">{post.content}</div>
 
         <div className="post-card-tags">
-          <div>
-            {post.tags?.map((tag, index) => (
-              <Tag color="blue" key={index}>
-                {tag}
-              </Tag>
-            ))}
-            {post.business?.map((business, index) => (
-              <Tag color="green" key={index}>
-                {business}
-              </Tag>
-            ))}
-          </div>
+          {post.tags?.map((tag, index) => (
+            <span key={index} className="post-card-tag">
+              {tag}
+            </span>
+          ))}
+
+          {post.tags?.map((businessTag, index) => (
+            <span key={index} className="post-card-business">
+              {businessTag}
+            </span>
+          ))}
         </div>
         <h4>Comments</h4>
         <div className="post-detail-comments">
