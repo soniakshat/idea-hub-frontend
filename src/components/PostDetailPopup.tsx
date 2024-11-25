@@ -14,14 +14,15 @@ interface PostDetailPopupProps {
   onDelete: (deletedPostId: string) => void; // Added delete callback
 }
 
-const statusColors: Record<string, string> = {
-  draft: "#4D4D4D", // Dark gray: Represents unfinished, neutral state.
-  "in review": "#B47300", // Amber: Caution, reflects evaluation or pending action.
-  approved: "#1B5E20", // Dark green: Positivity, success, and approval.
-  "in development": "#004B8D", // Navy blue: Progress, professional, and active work.
-  testing: "#8B4500", // Brownish orange: Critical stage and focus on finding errors.
-  completed: "#4A0072", // Deep purple: Finality and elegance for completed tasks.
-  archived: "#5D4037", // Earthy brown: Historical, inactive, and stored items.
+const statusColors: Record<string, { bg: string; font: string }> = {
+  draft: { bg: "#FFC4C4", font: "#8B0000" }, // Light Red with Dark Red font
+  review: { bg: "#FFD9A0", font: "#8B4500" }, // Light Orange with Burnt Orange font
+  approved: { bg: "#A4FFC4", font: "#006400" }, // Light Green with Dark Green font
+  dev: { bg: "#A0D9FF", font: "#003366" }, // Light Blue with Navy Blue font
+  testing: { bg: "#F4A0FF", font: "#5D0071" }, // Light Purple with Deep Purple font
+  completed: { bg: "#FFF4A0", font: "#8B7500" }, // Light Yellow with Dark Yellow font
+  archived: { bg: "#C4C4FF", font: "#00008B" }, // Light Lavender with Dark Blue font
+  published: { bg: "#FFC4F4", font: "#8B005D" }, // Light Pink with Deep Rose font
 };
 
 const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
@@ -151,26 +152,32 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
       }}
     >
       <div>
+        <div className="post-card-author">
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <div className="post-card-author-avatar">{post.author.name[0]}</div>
+            <span>{post.author.name}</span>
+          </div>
+          <span
+            className="post-card-status"
+            style={{
+              backgroundColor:
+                statusColors[post.status?.toLowerCase()]?.bg || "#000000",
+              color:
+                statusColors[post.status?.toLowerCase()]?.font || "#FFFFFF",
+              padding: "0.2rem 0.5rem",
+              borderRadius: "4px",
+              // fontWeight: "bold", // Optional for emphasis
+            }}
+          >
+            {post.status}
+          </span>
+        </div>
         <header className="post-card-header">
           <div>
             <h2 className="post-card-title">{post.title}</h2>
             <p className="post-card-date">{formatDate(post.timestamp)}</p>
-            <span
-              className="post-card-status"
-              style={{
-                backgroundColor:
-                  statusColors[post.status.toLowerCase()] || "#000000",
-              }}
-            >
-              {post.status}
-            </span>
           </div>
         </header>
-
-        <div className="post-card-author">
-          <div className="post-card-author-avatar">{post.author.name[0]}</div>
-          <span>{post.author.name}</span>
-        </div>
 
         <div className="post-card-content">{post.content}</div>
 

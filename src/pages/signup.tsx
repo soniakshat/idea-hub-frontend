@@ -68,7 +68,7 @@ const Signup: React.FC = () => {
 
       if (response.status === 201 || response.status === 200) {
         message.success("Signup successful! Please login.");
-        navigate("/login");
+        navigate("/");
       } else {
         throw new Error("Unexpected response status: " + response.status);
       }
@@ -174,7 +174,7 @@ const Signup: React.FC = () => {
         </Form>
         <div style={{ marginTop: "10px", textAlign: "center" }}>
           <Text>Already have an account? </Text>
-          <Link to="/login">Log in</Link>
+          <Link to="/">Log in</Link>
         </div>
       </Card>
     </div>

@@ -18,14 +18,15 @@ interface PostCardProps {
   onDelete: (deletedPostId: string) => void; // Add delete callback
 }
 
-const statusColors: Record<string, string> = {
-  draft: "#4D4D4D", // Dark gray: Represents unfinished, neutral state.
-  review: "#B47300", // Amber: Caution, reflects evaluation or pending action.
-  approved: "#1B5E20", // Dark green: Positivity, success, and approval.
-  dev: "#004B8D", // Navy blue: Progress, professional, and active work.
-  testing: "#8B4500", // Brownish orange: Critical stage and focus on finding errors.
-  completed: "#4A0072", // Deep purple: Finality and elegance for completed tasks.
-  archived: "#5D4037", // Earthy brown: Historical, inactive, and stored items.
+const statusColors: Record<string, { bg: string; font: string }> = {
+  draft: { bg: "#FFC4C4", font: "#8B0000" }, // Light Red with Dark Red font
+  review: { bg: "#FFD9A0", font: "#8B4500" }, // Light Orange with Burnt Orange font
+  approved: { bg: "#C4FFC4", font: "#006400" }, // Light Green with Dark Green font
+  dev: { bg: "#A0D9FF", font: "#003366" }, // Light Blue with Navy font
+  testing: { bg: "#FFF4A0", font: "#8B7500" }, // Light Yellow with Golden Brown font
+  completed: { bg: "#D9A0FF", font: "#5D0071" }, // Light Purple with Deep Purple font
+  archived: { bg: "#C4C4FF", font: "#00008B" }, // Light Lavender with Dark Blue font
+  published: { bg: "#FFC4E6", font: "#8B004B" }, // Light Pink with Deep Rose font
 };
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -144,7 +145,7 @@ const PostCard: React.FC<PostCardProps> = ({
         ? text.slice(0, truncatedChars) + indicator
         : text;
 
-    return <div>{formattedText}</div>;
+    return <div className="post-card-content">{formattedText}</div>;
   };
 
   return (
@@ -158,6 +159,30 @@ const PostCard: React.FC<PostCardProps> = ({
         lg={6}
       >
         <article className="post-card" onClick={handleCardClick}>
+          <div className="post-card-author">
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div className="post-card-author-avatar">
+                {currentPost.author.name[0]}
+              </div>
+              <span>{currentPost.author.name}</span>
+            </div>
+            <span
+              className="post-card-status"
+              style={{
+                backgroundColor:
+                  statusColors[currentPost.status?.toLowerCase()]?.bg ||
+                  "#000000",
+                color:
+                  statusColors[currentPost.status?.toLowerCase()]?.font ||
+                  "#FFFFFF",
+                padding: "0.2rem 0.5rem",
+                borderRadius: "4px",
+                // fontWeight: "bold", // Optional for emphasis
+              }}
+            >
+              {currentPost.status}
+            </span>
+          </div>
           <header className="post-card-header">
             <div>
               <h2 className="post-card-title">{currentPost.title}</h2>
@@ -167,27 +192,9 @@ const PostCard: React.FC<PostCardProps> = ({
                 </time>
               </div>
             </div>
-            <span
-              className="post-card-status"
-              style={{
-                backgroundColor:
-                  statusColors[currentPost.status?.toLowerCase()] || "#000000",
-              }}
-            >
-              {currentPost.status}
-            </span>
           </header>
 
-          <div className="post-card-author">
-            <div className="post-card-author-avatar">
-              {currentPost.author.name[0]}
-            </div>
-            <span>{currentPost.author.name}</span>
-          </div>
-
-          <div className="post-card-content">
-            <TruncateText text={currentPost.content} />
-          </div>
+          <TruncateText text={currentPost.content} />
 
           <div className="post-card-tags">
             {filteredTags.map((tag, index) => (

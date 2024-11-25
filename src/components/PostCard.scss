@@ -1,6 +1,6 @@
 /* Container for each PostCard */
 .post-card {
-    border: solid rgba(0, 0, 0, 0.02);
+    // border: solid rgba(0, 0, 0, 0.02);
     background: white;
     height: 100%;
     /* Ensure the card takes full height */
@@ -45,7 +45,9 @@
     &-author {
         display: flex;
         align-items: center;
-        margin-bottom: 12px;
+        justify-content: space-between;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eee;
 
         &-avatar {
             width: 32px;
@@ -62,7 +64,7 @@
     }
 
     &-content {
-        margin-bottom: 16px;
+        // margin-bottom: 16px;
         color: #4a4a4a;
         flex-grow: 1;
         /* Allow content to grow and take available space */
