@@ -155,9 +155,9 @@ const EditPost: React.FC = () => {
             <Form.Item label="Status" name="status">
               <Select>
                 <Option value="draft">Draft</Option>
-                <Option value="in review">In Review</Option>
+                <Option value="review">Review</Option>
                 <Option value="approved">Approved</Option>
-                <Option value="in development">In Development</Option>
+                <Option value="dev">Dev</Option>
                 <Option value="testing">Testing</Option>
                 <Option value="completed">Completed</Option>
                 <Option value="archived">Archived</Option>

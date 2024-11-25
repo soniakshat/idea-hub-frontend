@@ -20,16 +20,6 @@ function Home() {
   const [availableBusinesses, setAvailableBusinesses] = useState<string[]>([]);
   const [isFilterExpanded, setIsFilterExpanded] = useState<boolean>(false);
 
-  const statusColors: Record<string, string> = {
-    draft: "#4D4D4D", // Dark gray: Represents unfinished, neutral state.
-    "in review": "#B47300", // Amber: Caution, reflects evaluation or pending action.
-    approved: "#1B5E20", // Dark green: Positivity, success, and approval.
-    "in development": "#004B8D", // Navy blue: Progress, professional, and active work.
-    testing: "#8B4500", // Brownish orange: Critical stage and focus on finding errors.
-    completed: "#4A0072", // Deep purple: Finality and elegance for completed tasks.
-    archived: "#5D4037", // Earthy brown: Historical, inactive, and stored items.
-  };
-
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -96,7 +86,6 @@ function Home() {
     setFilteredPosts((prevFilteredPosts) =>
       prevFilteredPosts.filter((post) => post._id !== deletedPostId)
     );
-    message.success("Post deleted successfully!");
   };
 
   if (loading) {
@@ -144,7 +133,6 @@ function Home() {
               key={post._id}
               post={post}
               index={index}
-              statusColors={statusColors}
               formatDate={formatDate}
               handleUpvote={() =>
                 handleUpvote(

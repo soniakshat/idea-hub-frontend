@@ -12,17 +12,25 @@ import PostDetailPopup from "./PostDetailPopup";
 interface PostCardProps {
   post: Post;
   index: number;
-  statusColors: Record<string, string>;
   formatDate: (timestamp: string) => string;
   handleUpvote: () => Promise<void>; // Add this
   handleDownvote: () => Promise<void>; // Add this
   onDelete: (deletedPostId: string) => void; // Add delete callback
 }
 
+const statusColors: Record<string, string> = {
+  draft: "#4D4D4D", // Dark gray: Represents unfinished, neutral state.
+  review: "#B47300", // Amber: Caution, reflects evaluation or pending action.
+  approved: "#1B5E20", // Dark green: Positivity, success, and approval.
+  dev: "#004B8D", // Navy blue: Progress, professional, and active work.
+  testing: "#8B4500", // Brownish orange: Critical stage and focus on finding errors.
+  completed: "#4A0072", // Deep purple: Finality and elegance for completed tasks.
+  archived: "#5D4037", // Earthy brown: Historical, inactive, and stored items.
+};
+
 const PostCard: React.FC<PostCardProps> = ({
   post,
   index,
-  statusColors,
   formatDate,
   onDelete, // Receive delete callback
 }) => {
@@ -114,7 +122,6 @@ const PostCard: React.FC<PostCardProps> = ({
   const handleDelete = (deletedPostId: string) => {
     onDelete(deletedPostId); // Notify parent component about the deletion
     setIsPopupVisible(false); // Close the popup
-    message.success("Post deleted successfully!");
   };
 
   const filteredTags =
@@ -123,9 +130,33 @@ const PostCard: React.FC<PostCardProps> = ({
     currentPost.business?.filter((businessTag) => businessTag.trim() !== "") ||
     [];
 
+  interface TruncateTextProps {
+    text: string;
+  }
+
+  const TruncateText: React.FC<TruncateTextProps> = ({ text }) => {
+    const maxCharToShow = 500; // Fixed limit
+    const indicator = "...";
+    const truncatedChars = maxCharToShow - indicator.length;
+
+    const formattedText =
+      text.length > maxCharToShow
+        ? text.slice(0, truncatedChars) + indicator
+        : text;
+
+    return <div>{formattedText}</div>;
+  };
+
   return (
     <>
-      <Col key={currentPost.id} xs={24} sm={12} md={8} lg={6}>
+      <Col
+        className="post-card-container"
+        key={currentPost.id}
+        xs={24}
+        sm={12}
+        md={8}
+        lg={6}
+      >
         <article className="post-card" onClick={handleCardClick}>
           <header className="post-card-header">
             <div>
@@ -154,7 +185,9 @@ const PostCard: React.FC<PostCardProps> = ({
             <span>{currentPost.author.name}</span>
           </div>
 
-          <div className="post-card-content">{currentPost.content}</div>
+          <div className="post-card-content">
+            <TruncateText text={currentPost.content} />
+          </div>
 
           <div className="post-card-tags">
             {filteredTags.map((tag, index) => (
@@ -162,7 +195,9 @@ const PostCard: React.FC<PostCardProps> = ({
                 {tag}
               </span>
             ))}
+          </div>
 
+          <div className="post-card-tags">
             {filteredBusiness.map((businessTag, index) => (
               <span key={index} className="post-card-business">
                 {businessTag}

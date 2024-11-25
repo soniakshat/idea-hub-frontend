@@ -180,7 +180,8 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
               {tag}
             </span>
           ))}
-
+        </div>
+        <div className="post-card-tags">
           {post.business?.map((businessTag, index) => (
             <span key={index} className="post-card-business">
               {businessTag}

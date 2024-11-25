@@ -87,7 +87,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
             icon={<LogoutOutlined />}
             onClick={() => {
               localStorage.removeItem("authToken");
-              window.location.href = "/login";
+              window.location.href = "/";
             }}
           />
         </Tooltip>
