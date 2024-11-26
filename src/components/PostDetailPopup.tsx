@@ -5,6 +5,7 @@ import { Post } from "../types/Post";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import "./PostDetailPopup.scss";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 interface PostDetailPopupProps {
   visible: boolean;
@@ -42,12 +43,6 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
   const handleCommentSubmit = async () => {
     if (comment.trim()) {
       try {
-        const token = getLocalStorageItem("authToken");
-        if (!token) {
-          message.error("Authentication required!");
-          return;
-        }
-
         const userId = getLocalStorageItem("userId");
         const userName = getLocalStorageItem("userName");
 
@@ -56,25 +51,12 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
           return;
         }
 
-        const response = await fetch(
-          `https://api.techqubits.com/api/posts/addComment/${post._id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              id: userId,
-              author: userName,
-              content: comment,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to add comment");
-        }
+        // Use the API instance for the request
+        await API.put(`/api/posts/addComment/${post._id}`, {
+          id: userId,
+          author: userName,
+          content: comment,
+        });
 
         const newComment = {
           id: userId,
@@ -83,10 +65,12 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
           timestamp: new Date().toISOString(),
         };
 
+        // Update the comments locally
         setComments((prevComments) => [...prevComments, newComment]);
         setComment("");
         message.success("Comment added successfully!");
 
+        // Notify parent or update state
         onCommentSubmit({
           ...post,
           comments: [...comments, newComment],
@@ -100,25 +84,8 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
 
   const handleDelete = async () => {
     try {
-      const token = getLocalStorageItem("authToken");
-      if (!token) {
-        message.error("Authentication required!");
-        return;
-      }
-
-      const response = await fetch(
-        `https://api.techqubits.com/api/posts/${post._id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete post");
-      }
+      // Use the API instance for the DELETE request
+      await API.delete(`/api/posts/${post._id}`);
 
       message.success("Post deleted successfully!");
       onDelete(post._id); // Notify parent component about the deletion

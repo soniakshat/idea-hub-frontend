@@ -4,6 +4,7 @@ import { CommentOutlined, HeartFilled, HeartOutlined } from "@ant-design/icons";
 import "./PostCard.scss";
 import { Post } from "../types/Post";
 import PostDetailPopup from "./PostDetailPopup";
+import API from "../api";
 
 interface PostCardProps {
   post: Post;
@@ -56,34 +57,17 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const handleToggleLike = async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        message.error("Authentication required!");
-        return;
-      }
-
       if (!userId) {
         message.error("User ID missing!");
         return;
       }
 
-      const response = await fetch(
-        `https://api.techqubits.com/api/posts/like/${currentPost._id}/by/${userId}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      // Use the API instance for the request
+      const response = await API.put(
+        `/api/posts/like/${currentPost._id}/by/${userId}`
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Failed to toggle like:", errorData);
-        throw new Error("Failed to toggle like");
-      }
-
-      const result = await response.json();
+      const result = response.data; // Extract data from the response
       setIsLiked(result.status === 1); // Update like status
 
       // Update likes in the current post

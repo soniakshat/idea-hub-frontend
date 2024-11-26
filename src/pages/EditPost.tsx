@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./../components/Navbar.tsx";
 import { getLocalStorageItem } from "../utils/utils";
 const { Option } = Select;
+import API from "../api.js";
 
 const EditPost: React.FC = () => {
   const { postId } = useParams();
@@ -19,27 +20,10 @@ const EditPost: React.FC = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const token = getLocalStorageItem("authToken");
-        if (!token) {
-          message.error("Authentication required!");
-          return;
-        }
+        // Use the API instance for the GET request
+        const response = await API.get(`/api/posts/getPost/${postId}`);
 
-        const response = await fetch(
-          `https://api.techqubits.com/api/posts/getPost/${postId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch post data");
-        }
-
-        const postData = await response.json();
+        const postData = response.data; // Axios automatically parses JSON
         form.setFieldsValue({
           ...postData,
           tags: postData.tags?.join(", "),
@@ -54,42 +38,23 @@ const EditPost: React.FC = () => {
     fetchPost();
   }, [postId, form]);
 
-  const handleFormSubmit = async (values: any) => {
+  const handleFormSubmit = async (values) => {
     try {
       setLoading(true);
-
-      const token = getLocalStorageItem("authToken");
-      if (!token) {
-        message.error("Authentication required!");
-        return;
-      }
 
       // Transform tags and business fields to arrays
       const transformedValues = {
         ...values,
         tags: values.tags
-          ? values.tags.split(",").map((tag: string) => tag.trim())
+          ? values.tags.split(",").map((tag) => tag.trim())
           : [],
         business: values.business
-          ? values.business.split(",").map((b: string) => b.trim())
+          ? values.business.split(",").map((b) => b.trim())
           : [],
       };
 
-      const response = await fetch(
-        `https://api.techqubits.com/api/posts/${postId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(transformedValues),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update post");
-      }
+      // Use the API instance for the PUT request
+      await API.put(`/api/posts/${postId}`, transformedValues);
 
       message.success("Post updated successfully!");
       navigate("/home"); // Redirect to "My Posts" after successful update

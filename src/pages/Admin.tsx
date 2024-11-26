@@ -3,6 +3,7 @@ import { Table, Switch, message, Popconfirm, Button, Result } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { getLocalStorageItem } from "../utils/utils";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 interface User {
   _id: string;
@@ -29,26 +30,13 @@ const Admin: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = getLocalStorageItem("authToken");
-      if (!token) {
-        console.error("Authorization token is missing.");
-        return;
-      }
-      const response = await fetch("https://api.techqubits.com/user/getAll", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch users");
-      }
+      // Use the API instance for the GET request
+      const response = await API.get("/user/getAll");
 
-      const data = await response.json();
+      const data = response.data; // Axios automatically parses the JSON
       // Exclude admin users
-      const nonAdminUsers = data.users.filter((user: User) => !user.is_admin);
+      const nonAdminUsers = data.users.filter((user) => !user.is_admin);
       setUsers(nonAdminUsers || []);
       message.success("Users fetched successfully");
     } catch (error) {
@@ -60,30 +48,10 @@ const Admin: React.FC = () => {
   };
 
   // Toggle moderator status
-  const toggleModeratorStatus = async (
-    userId: string,
-    isModerator: boolean
-  ) => {
+  const toggleModeratorStatus = async (userId, isModerator) => {
     try {
-      const token = getLocalStorageItem("authToken");
-      if (!token) {
-        console.error("Authorization token is missing.");
-        return;
-      }
-      const response = await fetch(
-        `https://api.techqubits.com/user/${userId}/moderator`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to toggle moderator status");
-      }
+      // Use the API instance for the PATCH request
+      await API.patch(`/user/${userId}/moderator`);
 
       // Update the local state
       setUsers((prevUsers) =>
@@ -99,27 +67,10 @@ const Admin: React.FC = () => {
   };
 
   // Delete user
-  const deleteUser = async (userId: string) => {
+  const deleteUser = async (userId) => {
     try {
-      const token = getLocalStorageItem("authToken");
-      if (!token) {
-        console.error("Authorization token is missing.");
-        return;
-      }
-      const response = await fetch(
-        `https://api.techqubits.com/user/${userId}/`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete user");
-      }
+      // Use the API instance for the DELETE request
+      await API.delete(`/user/${userId}/`);
 
       // Update the local state
       setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
