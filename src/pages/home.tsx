@@ -5,11 +5,7 @@ import PostCard from "./../components/PostCard.tsx";
 import PostFilter from "./../components/PostFilter.tsx";
 import { Skeleton, Row, Col, message } from "antd";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
-import {
-  handleSearch,
-  handleUpvote,
-  handleDownvote,
-} from "../utils/postActions";
+import { handleSearch } from "../utils/postActions";
 import { Post } from "../types/Post";
 
 function Home() {
@@ -134,24 +130,6 @@ function Home() {
               post={post}
               index={index}
               formatDate={formatDate}
-              handleUpvote={() =>
-                handleUpvote(
-                  post._id,
-                  post.isUpvoted,
-                  index,
-                  filteredPosts,
-                  setFilteredPosts
-                )
-              }
-              handleDownvote={() =>
-                handleDownvote(
-                  post._id,
-                  post.isDownvoted,
-                  index,
-                  filteredPosts,
-                  setFilteredPosts
-                )
-              }
               onDelete={handlePostDelete} // Pass post deletion handler to PostCard
             />
           ))}

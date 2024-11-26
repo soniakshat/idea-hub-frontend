@@ -103,7 +103,6 @@
         border-top: 1px solid #eee;
     }
 
-    /* Upvote/Downvote button styles */
     &-vote-btn {
         display: flex;
         align-items: center;
@@ -121,14 +120,6 @@
 
         &-icon {
             font-size: 1.2rem;
-
-            &-upvoted {
-                color: #4caf50;
-            }
-
-            &-downvoted {
-                color: #FF0000;
-            }
         }
     }
 }

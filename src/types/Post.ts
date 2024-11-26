@@ -13,11 +13,8 @@ export interface Post {
   business?: string[];
   status: string;
   timestamp: string;
-  upvotes: number;
-  downvotes: number;
-  isUpvoted: boolean;
-  isDownvoted: boolean;
   comments: { id: string; content: string; author: string; timestamp: string }[];
+  likes: string[];
 }
 
 

@@ -5,11 +5,7 @@ import PostCard from "./../components/PostCard.tsx";
 import PostFilter from "./../components/PostFilter.tsx"; // Import PostFilter component
 import { Skeleton, Row, Col, Empty, message } from "antd";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
-import {
-  handleSearch,
-  handleUpvote,
-  handleDownvote,
-} from "../utils/postActions";
+import { handleSearch } from "../utils/postActions";
 import { Post } from "../types/Post";
 
 const MyPosts: React.FC = () => {
@@ -139,24 +135,6 @@ const MyPosts: React.FC = () => {
                 post={post}
                 index={index}
                 formatDate={formatDate}
-                handleUpvote={() =>
-                  handleUpvote(
-                    post._id,
-                    post.isUpvoted,
-                    index,
-                    filteredPosts,
-                    setFilteredPosts
-                  )
-                }
-                handleDownvote={() =>
-                  handleDownvote(
-                    post._id,
-                    post.isDownvoted,
-                    index,
-                    filteredPosts,
-                    setFilteredPosts
-                  )
-                }
                 onDelete={handlePostDelete}
               />
             ))}

@@ -1,10 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col, message } from "antd";
-import {
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  CommentOutlined,
-} from "@ant-design/icons";
+import { CommentOutlined, HeartFilled, HeartOutlined } from "@ant-design/icons";
 import "./PostCard.scss";
 import { Post } from "../types/Post";
 import PostDetailPopup from "./PostDetailPopup";
@@ -13,20 +9,18 @@ interface PostCardProps {
   post: Post;
   index: number;
   formatDate: (timestamp: string) => string;
-  handleUpvote: () => Promise<void>; // Add this
-  handleDownvote: () => Promise<void>; // Add this
-  onDelete: (deletedPostId: string) => void; // Add delete callback
+  onDelete: (deletedPostId: string) => void;
 }
 
 const statusColors: Record<string, { bg: string; font: string }> = {
-  draft: { bg: "#FFC4C4", font: "#8B0000" }, // Light Red with Dark Red font
-  review: { bg: "#FFD9A0", font: "#8B4500" }, // Light Orange with Burnt Orange font
-  approved: { bg: "#C4FFC4", font: "#006400" }, // Light Green with Dark Green font
-  dev: { bg: "#A0D9FF", font: "#003366" }, // Light Blue with Navy font
-  testing: { bg: "#FFF4A0", font: "#8B7500" }, // Light Yellow with Golden Brown font
-  completed: { bg: "#D9A0FF", font: "#5D0071" }, // Light Purple with Deep Purple font
-  archived: { bg: "#C4C4FF", font: "#00008B" }, // Light Lavender with Dark Blue font
-  published: { bg: "#FFC4E6", font: "#8B004B" }, // Light Pink with Deep Rose font
+  draft: { bg: "#FFC4C4", font: "#8B0000" },
+  review: { bg: "#FFD9A0", font: "#8B4500" },
+  approved: { bg: "#C4FFC4", font: "#006400" },
+  dev: { bg: "#A0D9FF", font: "#003366" },
+  testing: { bg: "#FFF4A0", font: "#8B7500" },
+  completed: { bg: "#D9A0FF", font: "#5D0071" },
+  archived: { bg: "#C4C4FF", font: "#00008B" },
+  published: { bg: "#FFC4E6", font: "#8B004B" },
 };
 
 const PostCard: React.FC<PostCardProps> = ({
@@ -37,6 +31,16 @@ const PostCard: React.FC<PostCardProps> = ({
 }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [currentPost, setCurrentPost] = useState(post);
+  const [isLiked, setIsLiked] = useState(false);
+
+  const userId = localStorage.getItem("userId"); // Retrieve userId from local storage
+
+  useEffect(() => {
+    // Check if the current user has already liked this post
+    if (currentPost.likes.includes(userId || "")) {
+      setIsLiked(true);
+    }
+  }, [currentPost.likes, userId]);
 
   const handleCardClick = () => {
     setIsPopupVisible(true);
@@ -50,7 +54,7 @@ const PostCard: React.FC<PostCardProps> = ({
     setCurrentPost(updatedPost); // Update the post with the new comments
   };
 
-  const handleUpvote = async () => {
+  const handleToggleLike = async () => {
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
@@ -58,65 +62,45 @@ const PostCard: React.FC<PostCardProps> = ({
         return;
       }
 
-      const response = await fetch(
-        `https://api.techqubits.com/api/posts/${currentPost._id}/upvote`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ increment: 1 }), // Upvote by 1
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Failed to upvote:", errorData);
-        throw new Error("Failed to upvote");
-      }
-
-      const updatedPost = await response.json();
-      setCurrentPost(updatedPost); // Update post with the new upvote count
-      message.success("Successfully upvoted!");
-    } catch (error) {
-      console.error("Error during upvote:", error);
-      message.error("Failed to upvote");
-    }
-  };
-
-  const handleDownvote = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        message.error("Authentication required!");
+      if (!userId) {
+        message.error("User ID missing!");
         return;
       }
 
       const response = await fetch(
-        `https://api.techqubits.com/api/posts/${currentPost._id}/downvote`,
+        `https://api.techqubits.com/api/posts/like/${currentPost._id}/by/${userId}`,
         {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ increment: 1 }), // Downvote by 1
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Failed to downvote:", errorData);
-        throw new Error("Failed to downvote");
+        console.error("Failed to toggle like:", errorData);
+        throw new Error("Failed to toggle like");
       }
 
-      const updatedPost = await response.json();
-      setCurrentPost(updatedPost); // Update post with the new downvote count
-      message.success("Successfully downvoted!");
+      const result = await response.json();
+      setIsLiked(result.status === 1); // Update like status
+
+      // Update likes in the current post
+      if (result.status === 1) {
+        setCurrentPost((prevPost) => ({
+          ...prevPost,
+          likes: [...prevPost.likes, userId],
+        }));
+      } else {
+        setCurrentPost((prevPost) => ({
+          ...prevPost,
+          likes: prevPost.likes.filter((id) => id !== userId),
+        }));
+      }
     } catch (error) {
-      console.error("Error during downvote:", error);
-      message.error("Failed to downvote");
+      console.error("Error during toggle like:", error);
+      message.error("Failed to toggle like");
     }
   };
 
@@ -218,33 +202,15 @@ const PostCard: React.FC<PostCardProps> = ({
                 className="post-card-vote-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleUpvote();
+                  handleToggleLike();
                 }}
               >
-                <ArrowUpOutlined
-                  className={`post-card-vote-icon ${
-                    currentPost.isUpvoted
-                      ? "post-card-vote-icon-upvoted"
-                      : "post-card-vote-icon-upvoted"
-                  }`}
-                />
-                {currentPost.upvotes}
-              </button>
-              <button
-                className="post-card-vote-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDownvote();
-                }}
-              >
-                <ArrowDownOutlined
-                  className={`post-card-vote-icon ${
-                    currentPost.isDownvoted
-                      ? "post-card-vote-icon-downvoted"
-                      : "post-card-vote-icon-downvoted"
-                  }`}
-                />
-                {currentPost.downvotes}
+                {isLiked ? (
+                  <HeartFilled style={{ color: "#ff4d4f" }} />
+                ) : (
+                  <HeartOutlined />
+                )}{" "}
+                {currentPost.likes.length}
               </button>
             </div>
             <div>

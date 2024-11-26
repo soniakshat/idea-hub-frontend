@@ -1,10 +1,15 @@
-import React from 'react';
-import { message } from 'antd';
-import API from '../api';
-import { useNavigate } from 'react-router-dom';
-import Navbar from './../components/Navbar.tsx';
-import PostForm from './../components/PostForm.tsx';
-import { formatDate, generateUniqueId, parseCommaSeparatedValues, getLocalStorageItem } from '../utils/utils';
+import React from "react";
+import { message } from "antd";
+import API from "../api";
+import { useNavigate } from "react-router-dom";
+import Navbar from "./../components/Navbar.tsx";
+import PostForm from "./../components/PostForm.tsx";
+import {
+  formatDate,
+  generateUniqueId,
+  parseCommaSeparatedValues,
+  getLocalStorageItem,
+} from "../utils/utils";
 
 interface Post {
   title: string;
@@ -19,15 +24,15 @@ const CreatePost: React.FC = () => {
 
   const handleSubmit = async (postData: Post) => {
     try {
-      const token = getLocalStorageItem('authToken');
-      const userName = getLocalStorageItem('userName');
-      const userId = getLocalStorageItem('userId');
+      const token = getLocalStorageItem("authToken");
+      const userName = getLocalStorageItem("userName");
+      const userId = getLocalStorageItem("userId");
 
       const postPayload = {
         post: {
           author: {
-            id: userId?.toString() || '',
-            name: userName || '',
+            id: userId?.toString() || "",
+            name: userName || "",
           },
           id: generateUniqueId(),
           title: postData.title,
@@ -42,17 +47,17 @@ const CreatePost: React.FC = () => {
         },
       };
 
-      await API.post('/api/posts', postPayload, {
+      await API.post("/api/posts", postPayload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      message.success('Post created successfully!');
-      navigate('/home');
+      message.success("Post created successfully!");
+      navigate("/home");
     } catch (error: any) {
-      console.error('Error creating post:', error.response || error);
-      message.error('Failed to create post. Please try again.');
+      console.error("Error creating post:", error.response || error);
+      message.error("Failed to create post. Please try again.");
     }
   };
 
@@ -61,11 +66,11 @@ const CreatePost: React.FC = () => {
       <Navbar expandFilter={() => {}} />
       <PostForm
         initialPost={{
-          title: '',
-          content: '',
-          tags: '',
-          business: '',
-          status: 'draft',
+          title: "",
+          content: "",
+          tags: "",
+          business: "",
+          status: "draft",
         }}
         onSubmit={handleSubmit}
       />
