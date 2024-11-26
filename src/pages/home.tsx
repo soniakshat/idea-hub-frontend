@@ -3,7 +3,7 @@ import API from "../api";
 import Navbar from "./../components/Navbar.tsx";
 import PostCard from "./../components/PostCard.tsx";
 import PostFilter from "./../components/PostFilter.tsx";
-import { Skeleton, Row, Col, message } from "antd";
+import { Skeleton, Row, Col, message, Empty } from "antd";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import { handleSearch } from "../utils/postActions";
 import { Post } from "../types/Post";
@@ -123,17 +123,21 @@ function Home() {
           transition: "margin-left 0.3s ease",
         }}
       >
-        <Row gutter={[16, 16]}>
-          {filteredPosts.map((post, index) => (
-            <PostCard
-              key={post._id}
-              post={post}
-              index={index}
-              formatDate={formatDate}
-              onDelete={handlePostDelete} // Pass post deletion handler to PostCard
-            />
-          ))}
-        </Row>
+        {filteredPosts.length > 0 ? (
+          <Row gutter={[16, 16]}>
+            {filteredPosts.map((post, index) => (
+              <PostCard
+                key={post._id}
+                post={post}
+                index={index}
+                formatDate={formatDate}
+                onDelete={handlePostDelete}
+              />
+            ))}
+          </Row>
+        ) : (
+          <Empty description="No Posts Found" style={{ marginTop: "20px" }} />
+        )}
       </div>
     </>
   );
