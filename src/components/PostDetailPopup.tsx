@@ -108,12 +108,10 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
       onCancel={onClose}
       footer={null}
       width="80%"
-      bodyStyle={{
+      style={{
         maxHeight: "85vh",
         overflowY: "auto",
         padding: "16px",
-      }}
-      style={{
         top: 20,
         maxWidth: "90%",
       }}

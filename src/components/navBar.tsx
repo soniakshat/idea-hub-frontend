@@ -13,7 +13,7 @@ import "./Navbar.scss";
 
 interface NavbarProps {
   onSearch?: (query: string) => void;
-  expandFilter: () => void;
+  expandFilter?: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
@@ -29,16 +29,17 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
         </Link>
       </div>
 
-      {/* Center Section: Search */}
-      <div className="navbar-center">
-        <Input
-          className="navbar-search"
-          placeholder="Search Idea"
-          prefix={<SearchOutlined />}
-          onChange={(e) => onSearch && onSearch(e.target.value)}
-          allowClear
-        />
-      </div>
+      {onSearch && (
+        <div className="navbar-center">
+          <Input
+            className="navbar-search"
+            placeholder="Search Idea"
+            prefix={<SearchOutlined />}
+            onChange={(e) => onSearch(e.target.value)}
+            allowClear
+          />
+        </div>
+      )}
 
       {/* Right Section: Buttons */}
       <div className="navbar-right">
@@ -54,14 +55,16 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
             </Link>
           </Tooltip>
         )}
-        <Tooltip title="Filters">
-          <Button
-            type="link"
-            icon={<FilterOutlined />}
-            className="filter-btn"
-            onClick={expandFilter}
-          />
-        </Tooltip>
+        {expandFilter && (
+          <Tooltip title="Filters">
+            <Button
+              type="link"
+              icon={<FilterOutlined />}
+              className="filter-btn"
+              onClick={expandFilter}
+            />
+          </Tooltip>
+        )}
         <Tooltip title="My Posts">
           <Link to="/myposts">
             <Button

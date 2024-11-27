@@ -13,21 +13,24 @@ const EditPost: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
-  // Check if user is a moderator from local storage
+  const [tags, setTags] = useState<string[]>([]);
+  const [businessUnits, setBusinessUnits] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState<string>("");
+  const [businessInput, setBusinessInput] = useState<string>("");
+
   const isModerator = getLocalStorageItem("is_moderator") === "true";
 
-  // Fetch existing post data
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        // Use the API instance for the GET request
         const response = await API.get(`/api/posts/getPost/${postId}`);
+        const postData = response.data;
 
-        const postData = response.data; // Axios automatically parses JSON
+        setTags(postData.tags || []);
+        setBusinessUnits(postData.business || []);
+
         form.setFieldsValue({
           ...postData,
-          tags: postData.tags?.join(", "),
-          business: postData.business?.join(", "),
         });
       } catch (error) {
         console.error("Error fetching post:", error);
@@ -38,26 +41,71 @@ const EditPost: React.FC = () => {
     fetchPost();
   }, [postId, form]);
 
+  const handleTagInput = (e) => {
+    setTagInput(e.target.value);
+  };
+
+  const handleTagKeyPress = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()]);
+        setTagInput("");
+      }
+    }
+  };
+
+  const handleTagRemove = (removedTag) => {
+    setTags(tags.filter((tag) => tag !== removedTag));
+  };
+
+  const handleBusinessInput = (e) => {
+    setBusinessInput(e.target.value);
+  };
+
+  const handleBusinessKeyPress = (e) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (
+        businessInput.trim() &&
+        !businessUnits.includes(businessInput.trim())
+      ) {
+        setBusinessUnits([...businessUnits, businessInput.trim()]);
+        setBusinessInput("");
+      }
+    }
+  };
+
+  const handleBusinessRemove = (removedBusiness) => {
+    setBusinessUnits(
+      businessUnits.filter((business) => business !== removedBusiness)
+    );
+  };
+
   const handleFormSubmit = async (values) => {
     try {
       setLoading(true);
 
-      // Transform tags and business fields to arrays
+      if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+        setTags((prev) => [...prev, tagInput.trim()]);
+      }
+      if (
+        businessInput.trim() &&
+        !businessUnits.includes(businessInput.trim())
+      ) {
+        setBusinessUnits((prev) => [...prev, businessInput.trim()]);
+      }
+
       const transformedValues = {
         ...values,
-        tags: values.tags
-          ? values.tags.split(",").map((tag) => tag.trim())
-          : [],
-        business: values.business
-          ? values.business.split(",").map((b) => b.trim())
-          : [],
+        tags: tags,
+        business: businessUnits,
       };
 
-      // Use the API instance for the PUT request
       await API.put(`/api/posts/${postId}`, transformedValues);
 
       message.success("Post updated successfully!");
-      navigate("/home"); // Redirect to "My Posts" after successful update
+      navigate("/home");
     } catch (error) {
       console.error("Error updating post:", error);
       message.error("Failed to update post");
@@ -68,7 +116,7 @@ const EditPost: React.FC = () => {
 
   return (
     <>
-      <Navbar expandFilter={() => {}} />
+      <Navbar />
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px" }}>
         <h1
           style={{
@@ -107,15 +155,76 @@ const EditPost: React.FC = () => {
             <Input.TextArea rows={4} placeholder="Enter the content" />
           </Form.Item>
 
-          <Form.Item label="Tags" name="tags">
-            <Input placeholder="Comma-separated tags (e.g., tag1, tag2)" />
+          <Form.Item label="Tags">
+            <div style={{ marginBottom: "10px" }}>
+              {tags.map((tag) => (
+                <Tag
+                  key={tag}
+                  closable
+                  style={{
+                    backgroundColor: "#e9ecef",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    fontSize: "0.8rem",
+                    marginBottom: "6px",
+                  }}
+                  onClose={() => handleTagRemove(tag)}
+                >
+                  {tag}
+                </Tag>
+              ))}
+            </div>
+            <Input
+              value={tagInput}
+              onChange={handleTagInput}
+              onKeyPress={handleTagKeyPress}
+              placeholder="Press Enter or ',' to add tags"
+              onBlur={() => {
+                if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+                  setTags([...tags, tagInput.trim()]);
+                  setTagInput("");
+                }
+              }}
+            />
           </Form.Item>
 
-          <Form.Item label="Business" name="business">
-            <Input placeholder="Comma-separated business units" />
+          <Form.Item label="Business">
+            <div style={{ marginBottom: "10px" }}>
+              {businessUnits.map((business) => (
+                <Tag
+                  key={business}
+                  closable
+                  style={{
+                    color: "#1976d2",
+                    borderRadius: "4px",
+                    padding: "4px 8px",
+                    marginBottom: "6px",
+                    backgroundColor: "#e3f2fd",
+                    fontSize: "0.8rem",
+                  }}
+                  onClose={() => handleBusinessRemove(business)}
+                >
+                  {business}
+                </Tag>
+              ))}
+            </div>
+            <Input
+              value={businessInput}
+              onChange={handleBusinessInput}
+              onKeyPress={handleBusinessKeyPress}
+              placeholder="Press Enter or ',' to add business units"
+              onBlur={() => {
+                if (
+                  businessInput.trim() &&
+                  !businessUnits.includes(businessInput.trim())
+                ) {
+                  setBusinessUnits([...businessUnits, businessInput.trim()]);
+                  setBusinessInput("");
+                }
+              }}
+            />
           </Form.Item>
 
-          {/* Status field for moderators */}
           {isModerator && (
             <Form.Item label="Status" name="status">
               <Select>
@@ -137,7 +246,7 @@ const EditPost: React.FC = () => {
             </Button>
             &nbsp;&nbsp;&nbsp;
             <Button type="primary" onClick={() => navigate("/home")}>
-              Cancle Edit
+              Cancel Edit
             </Button>
           </Form.Item>
         </Form>

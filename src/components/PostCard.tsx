@@ -118,14 +118,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
   return (
     <>
-      <Col
-        className="post-card-container"
-        key={currentPost.id}
-        xs={24}
-        sm={12}
-        md={8}
-        lg={6}
-      >
+      <Col key={currentPost.id} xs={24} sm={12} md={8} lg={6}>
         <article className="post-card" onClick={handleCardClick}>
           <div className="post-card-author">
             <div style={{ display: "flex", alignItems: "center" }}>

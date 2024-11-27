@@ -1,7 +1,8 @@
-// src/components/PostFilter.tsx
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./PostFilter.scss";
+import { Input, Checkbox } from "antd";
+const { Search } = Input;
+import type { CheckboxProps } from "antd";
 
 interface PostFilterProps {
   tags: string[];
@@ -21,18 +22,31 @@ const PostFilter: React.FC<PostFilterProps> = ({
   isExpanded,
   onToggleExpand,
 }) => {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedBusinesses, setSelectedBusinesses] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]); // Applied tags
+  const [selectedBusinesses, setSelectedBusinesses] = useState<string[]>([]); // Applied businesses
+
+  const [tempSelectedTags, setTempSelectedTags] = useState<string[]>([]); // Temporary tags
+  const [tempSelectedBusinesses, setTempSelectedBusinesses] = useState<
+    string[]
+  >([]); // Temporary businesses
   const [searchTerm, setSearchTerm] = useState<string>("");
 
+  useEffect(() => {
+    if (isExpanded) {
+      // Sync temporary selections with applied filters when the panel is opened
+      setTempSelectedTags(selectedTags);
+      setTempSelectedBusinesses(selectedBusinesses);
+    }
+  }, [isExpanded, selectedTags, selectedBusinesses]);
+
   const handleTagChange = (tag: string) => {
-    setSelectedTags((prev) =>
+    setTempSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
   const handleBusinessChange = (business: string) => {
-    setSelectedBusinesses((prev) =>
+    setTempSelectedBusinesses((prev) =>
       prev.includes(business)
         ? prev.filter((b) => b !== business)
         : [...prev, business]
@@ -40,12 +54,15 @@ const PostFilter: React.FC<PostFilterProps> = ({
   };
 
   const applyFilters = () => {
-    onApplyFilters(selectedTags, selectedBusinesses);
+    setSelectedTags(tempSelectedTags);
+    setSelectedBusinesses(tempSelectedBusinesses);
+    onApplyFilters(tempSelectedTags, tempSelectedBusinesses);
   };
 
   const clearAllFilters = () => {
-    setSelectedTags([]);
-    setSelectedBusinesses([]);
+    setTempSelectedTags([]);
+    setTempSelectedBusinesses([]);
+    setSearchTerm("");
     onApplyFilters([], []); // Automatically show all posts
   };
 
@@ -61,46 +78,42 @@ const PostFilter: React.FC<PostFilterProps> = ({
   return (
     <div className="post-filter-container">
       <div className="filter-header">
-        <span>Filters</span>
+        <h2>Filters</h2>
         <button className="clear-filters-btn" onClick={clearAllFilters}>
           Clear All
         </button>
       </div>
-
-      <input
-        type="text"
-        className="search-input"
+      <Search
+        type="search"
         placeholder="Search filters..."
         value={searchTerm}
+        style={{ marginRight: "20px", padding: "8px 16px" }}
         onChange={(e) => setSearchTerm(e.target.value)}
-      />
+        allowClear
+      ></Search>
 
       <div className="filter-content">
         <h3>Tags</h3>
         <div className="filter-section">
           {filteredTags.map((tag) => (
-            <label key={tag}>
-              <input
-                type="checkbox"
-                checked={selectedTags.includes(tag)}
-                onChange={() => handleTagChange(tag)}
-              />
+            <Checkbox
+              checked={tempSelectedTags.includes(tag)}
+              onChange={() => handleTagChange(tag)}
+            >
               {tag}
-            </label>
+            </Checkbox>
           ))}
         </div>
 
         <h3>Businesses</h3>
         <div className="filter-section">
           {filteredBusinesses.map((business) => (
-            <label key={business}>
-              <input
-                type="checkbox"
-                checked={selectedBusinesses.includes(business)}
-                onChange={() => handleBusinessChange(business)}
-              />
+            <Checkbox
+              checked={tempSelectedBusinesses.includes(business)}
+              onChange={() => handleBusinessChange(business)}
+            >
               {business}
-            </label>
+            </Checkbox>
           ))}
         </div>
       </div>

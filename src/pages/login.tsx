@@ -79,7 +79,7 @@ const Login: React.FC = () => {
           src="/Idea-nexus.png"
           width="150"
           height="150"
-          alt="Logo for Ideahub by Idea Nexus"
+          alt="Ideahub Logo"
         />
         <Title level={2}>Login</Title>
         <Form layout="vertical" onFinish={handleLogin}>

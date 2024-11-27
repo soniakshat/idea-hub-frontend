@@ -1,3 +1,26 @@
-body{
+/* index.scss */
+
+/* Import Google Fonts or any custom font (optional) */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* Apply global styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    /* Replace with your preferred font */
+    font-size: 16px;
+    /* Base font size */
+    line-height: 1.5;
+    /* Consistent line height */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     background-color: #f0f2f5;
+}
+
+/* Ensure all elements inherit the font */
+* {
+    font-family: inherit;
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
 }
