@@ -5,6 +5,7 @@ import "./PostCard.scss";
 import { Post } from "../types/Post";
 import PostDetailPopup from "./PostDetailPopup";
 import API from "../api";
+import CountUp from "react-countup";
 
 interface PostCardProps {
   post: Post;
@@ -187,11 +188,11 @@ const PostCard: React.FC<PostCardProps> = ({
                 ) : (
                   <HeartOutlined />
                 )}{" "}
-                {currentPost.likes.length}
+                <CountUp end={currentPost.likes.length} />
               </button>
             </div>
             <div>
-              <CommentOutlined /> {currentPost.comments.length}
+              <CountUp end={currentPost.comments.length} />
             </div>
           </footer>
         </article>
