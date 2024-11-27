@@ -105,7 +105,7 @@ const PostCard: React.FC<PostCardProps> = ({
   }
 
   const TruncateText: React.FC<TruncateTextProps> = ({ text }) => {
-    const maxCharToShow = 500; // Fixed limit
+    const maxCharToShow = 250; // Fixed limit
     const indicator = "...";
     const truncatedChars = maxCharToShow - indicator.length;
 
