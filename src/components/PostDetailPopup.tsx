@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Modal, Input, Tag, message, Popconfirm, Button, Tooltip } from "antd";
-import { EditOutlined, DeleteOutlined, SendOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  SendOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
 import { Post } from "../types/Post";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import "./PostDetailPopup.scss";
@@ -12,18 +17,18 @@ interface PostDetailPopupProps {
   post: Post;
   onClose: () => void;
   onCommentSubmit: (updatedPost: Post) => void;
-  onDelete: (deletedPostId: string) => void; // Added delete callback
+  onDelete: (deletedPostId: string) => void;
 }
 
 const statusColors: Record<string, { bg: string; font: string }> = {
-  draft: { bg: "#FFC4C4", font: "#8B0000" }, // Light Red with Dark Red font
-  review: { bg: "#FFD9A0", font: "#8B4500" }, // Light Orange with Burnt Orange font
-  approved: { bg: "#A4FFC4", font: "#006400" }, // Light Green with Dark Green font
-  dev: { bg: "#A0D9FF", font: "#003366" }, // Light Blue with Navy Blue font
-  testing: { bg: "#F4A0FF", font: "#5D0071" }, // Light Purple with Deep Purple font
-  completed: { bg: "#FFF4A0", font: "#8B7500" }, // Light Yellow with Dark Yellow font
-  archived: { bg: "#C4C4FF", font: "#00008B" }, // Light Lavender with Dark Blue font
-  published: { bg: "#FFC4F4", font: "#8B005D" }, // Light Pink with Deep Rose font
+  draft: { bg: "#FFC4C4", font: "#8B0000" },
+  review: { bg: "#FFD9A0", font: "#8B4500" },
+  approved: { bg: "#A4FFC4", font: "#006400" },
+  dev: { bg: "#A0D9FF", font: "#003366" },
+  testing: { bg: "#F4A0FF", font: "#5D0071" },
+  completed: { bg: "#FFF4A0", font: "#8B7500" },
+  archived: { bg: "#C4C4FF", font: "#00008B" },
+  published: { bg: "#FFC4F4", font: "#8B005D" },
 };
 
 const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
@@ -31,10 +36,11 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
   post,
   onClose,
   onCommentSubmit,
-  onDelete, // Added delete callback
+  onDelete,
 }) => {
   const [comment, setComment] = useState<string>("");
   const [comments, setComments] = useState(post.comments);
+  const [loading, setLoading] = useState(false); // State to manage button loading
 
   const showButton =
     getLocalStorageItem("is_moderator") === "true" ||
@@ -42,16 +48,18 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
 
   const handleCommentSubmit = async () => {
     if (comment.trim()) {
+      setLoading(true); // Disable button while API call is in progress
       try {
         const userId = getLocalStorageItem("userId");
         const userName = getLocalStorageItem("userName");
 
         if (!userId || !userName) {
           message.error("User information is missing!");
+          setLoading(false);
           return;
         }
 
-        // Use the API instance for the request
+        // API call to submit comment
         await API.put(`/api/posts/addComment/${post._id}`, {
           id: userId,
           author: userName,
@@ -78,18 +86,19 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
       } catch (error) {
         console.error("Error adding comment:", error);
         message.error("Failed to add comment");
+      } finally {
+        setLoading(false); // Re-enable button after API call completes
       }
     }
   };
 
   const handleDelete = async () => {
     try {
-      // Use the API instance for the DELETE request
+      // API call to delete post
       await API.delete(`/api/posts/${post._id}`);
-
       message.success("Post deleted successfully!");
-      onDelete(post._id); // Notify parent component about the deletion
-      onClose(); // Close the popup
+      onDelete(post._id); // Notify parent component
+      onClose(); // Close popup
     } catch (error) {
       console.error("Error deleting post:", error);
       message.error("Failed to delete post");
@@ -98,7 +107,6 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
 
   const navigate = useNavigate();
   const handleEdit = () => {
-    // message.info("Edit functionality coming soon!");
     navigate(`/edit/${post._id}`);
   };
 
@@ -106,12 +114,12 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
     <Modal
       open={visible}
       onCancel={onClose}
+      closable={false}
       footer={null}
       width="80%"
       style={{
         maxHeight: "85vh",
-        overflowY: "auto",
-        padding: "16px",
+        overflow: "hidden",
         top: 20,
         maxWidth: "90%",
       }}
@@ -122,105 +130,128 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
             <div className="post-card-author-avatar">{post.author.name[0]}</div>
             <span>{post.author.name}</span>
           </div>
-          <span
-            className="post-card-status"
-            style={{
-              backgroundColor:
-                statusColors[post.status?.toLowerCase()]?.bg || "#000000",
-              color:
-                statusColors[post.status?.toLowerCase()]?.font || "#FFFFFF",
-              padding: "0.2rem 0.5rem",
-              borderRadius: "4px",
-              // fontWeight: "bold", // Optional for emphasis
-            }}
-          >
-            {post.status}
-          </span>
-        </div>
-        <header className="post-card-header">
-          <div>
-            <h2 className="post-card-title">{post.title}</h2>
-            <p className="post-card-date">{formatDate(post.timestamp)}</p>
-          </div>
-        </header>
-
-        <div className="post-card-content">{post.content}</div>
-        <br></br>
-        <div className="post-card-tags">
-          {post.tags?.map((tag, index) => (
-            <span key={index} className="post-card-tag">
-              {tag}
+          <div style={{ display: "flex", alignItems: "right" }}>
+            <span
+              className="post-card-status"
+              style={{
+                backgroundColor:
+                  statusColors[post.status?.toLowerCase()]?.bg || "#000000",
+                color:
+                  statusColors[post.status?.toLowerCase()]?.font || "#FFFFFF",
+                padding: "0.2rem 0.5rem",
+                borderRadius: "4px",
+              }}
+            >
+              {post.status}
             </span>
-          ))}
-        </div>
-        <div className="post-card-tags">
-          {post.business?.map((businessTag, index) => (
-            <span key={index} className="post-card-business">
-              {businessTag}
-            </span>
-          ))}
-        </div>
-        <h4>Comments</h4>
-        <div className="post-detail-comments">
-          {comments.length === 0 ? (
-            <div>No comments yet..!!</div>
-          ) : (
-            <div className="comment-list">
-              {comments.map((c, idx) => (
-                <div key={idx} className="comment-item">
-                  <strong>{c.author}</strong>
-                  {c.content}
-                  <div className="comment-timestamp">
-                    {formatDate(c.timestamp)}
-                  </div>
-                </div>
-              ))}
+            &nbsp;&nbsp;&nbsp;
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+                onClick={onClose}
+              >
+                <CloseOutlined />
+              </button>
             </div>
-          )}
+          </div>
         </div>
-        <br />
-        <div className="add-comment">
-          <Input.TextArea
-            rows={2}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Add a comment..."
-          />
-          <Tooltip title="Submit Comment">
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              aria-label="Add comment to the post"
-              onClick={handleCommentSubmit}
-              disabled={!comment.trim()}
-            />
-          </Tooltip>
-        </div>
-        <br />
+        <div
+          style={{
+            maxHeight: "75vh",
+            overflowY: "auto",
+            paddingRight: "16px",
+          }}
+        >
+          <header className="post-card-header">
+            <div>
+              <h2 className="post-card-title">{post.title}</h2>
+              <p className="post-card-date">{formatDate(post.timestamp)}</p>
+            </div>
+          </header>
 
-        {showButton && (
-          <footer className="post-card-footer">
-            <Tooltip title="Edit Post">
+          <div className="post-card-content">{post.content}</div>
+          <br />
+          <div className="post-card-tags">
+            {post.tags?.map((tag, index) => (
+              <span key={index} className="post-card-tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <div className="post-card-tags">
+            {post.business?.map((businessTag, index) => (
+              <span key={index} className="post-card-business">
+                {businessTag}
+              </span>
+            ))}
+          </div>
+          <h4>Comments</h4>
+          <div className="post-detail-comments">
+            {comments.length === 0 ? (
+              <div>No comments yet..!!</div>
+            ) : (
+              <div className="comment-list">
+                {comments.map((c, idx) => (
+                  <div key={idx} className="comment-item">
+                    <strong>{c.author}</strong>
+                    {c.content}
+                    <div className="comment-timestamp">
+                      {formatDate(c.timestamp)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <br />
+          <div className="add-comment">
+            <Input.TextArea
+              rows={2}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Add a comment..."
+            />
+            <Tooltip title="Submit Comment">
               <Button
                 type="primary"
-                icon={<EditOutlined />}
-                aria-label="Edit this post"
-                onClick={handleEdit}
+                icon={<SendOutlined />}
+                aria-label="Add comment to the post"
+                onClick={handleCommentSubmit}
+                disabled={!comment.trim() || loading}
+                loading={loading} // Show spinner while waiting for API response
               />
             </Tooltip>
-            <Tooltip title="Delete Post">
-              <Popconfirm
-                title="Are you sure you want to delete this post?"
-                aria-label="Delete the post"
-                onConfirm={handleDelete}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button danger icon={<DeleteOutlined />} />
-              </Popconfirm>
-            </Tooltip>
-          </footer>
-        )}
+          </div>
+          <br />
+          {showButton && (
+            <footer className="post-card-footer">
+              <Tooltip title="Edit Post">
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  aria-label="Edit this post"
+                  onClick={handleEdit}
+                />
+              </Tooltip>
+              <Tooltip title="Delete Post">
+                <Popconfirm
+                  title="Are you sure you want to delete this post?"
+                  aria-label="Delete the post"
+                  onConfirm={handleDelete}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button danger icon={<DeleteOutlined />} />
+                </Popconfirm>
+              </Tooltip>
+            </footer>
+          )}
+        </div>
       </div>
     </Modal>
   );
