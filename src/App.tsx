@@ -8,6 +8,8 @@ import {
 } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import ProtectedRoute from "./components/ProtectedRoute"; // Ensure this is compatible with TS
+import Navbar from "./components/Navbar.tsx";
+import { Row, Col, Skeleton } from "antd";
 
 // Lazy-loaded page components
 const Admin = lazy(() => import("./pages/Admin"));
@@ -23,7 +25,20 @@ const Page404 = lazy(() => import("./pages/page404"));
 const App: React.FC = () => {
   return (
     <Router>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense
+        fallback={
+          <>
+            <Navbar expandFilter={() => {}} />
+            <Row gutter={[16, 16]} style={{ padding: "20px" }}>
+              {Array.from({ length: 8 }).map((_, index) => (
+                <Col key={index} xs={24} sm={12} md={8} lg={6}>
+                  <Skeleton active avatar paragraph={{ rows: 4 }} />
+                </Col>
+              ))}
+            </Row>
+          </>
+        }
+      >
         <Routes>
           {/* Redirect "/" to "/login" */}
           <Route path="/" element={<Navigate to="/login" replace />} />
