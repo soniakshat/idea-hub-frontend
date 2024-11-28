@@ -51,6 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
                 type="primary"
                 icon={<CrownOutlined />}
                 className="admin-btn"
+                aria-label="Go to Admin Page"
               />
             </Link>
           </Tooltip>
@@ -62,6 +63,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
               icon={<FilterOutlined />}
               className="filter-btn"
               onClick={expandFilter}
+              aria-label="Open Filter Panel"
             />
           </Tooltip>
         )}
@@ -80,6 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
               type="primary"
               icon={<PlusOutlined />}
               className="create-post-btn"
+              aria-label="Go to Create Post"
             />
           </Link>
         </Tooltip>
@@ -88,6 +91,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
             type="primary"
             danger
             icon={<LogoutOutlined />}
+            aria-label="Logout"
             onClick={() => {
               localStorage.removeItem("authToken");
               window.location.href = "/";

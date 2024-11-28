@@ -76,7 +76,7 @@ const PostForm: React.FC<PostFormProps> = ({ initialPost, onSubmit }) => {
           />
         </Form.Item>
 
-        <Button type="primary" htmlType="submit">
+        <Button type="primary" htmlType="submit" aria-label="Submit this Post">
           Submit Post
         </Button>
       </Form>

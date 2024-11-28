@@ -23,7 +23,7 @@ const CreatePost: React.FC = () => {
   };
 
   const handleTagKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
+    if ((e.key === "Enter" || e.key === ",")) {
       e.preventDefault();
       if (tagInput.trim() && !tags.includes(tagInput.trim())) {
         setTags([...tags, tagInput.trim()]);
@@ -141,18 +141,28 @@ const CreatePost: React.FC = () => {
           <Form.Item
             label="Title"
             name="title"
-            rules={[{ required: true, message: "Please enter the title" }]}
+            rules={[
+              { required: true, message: "Please enter the title" },
+              { max: 150, message: "Title cannot be longer than 150 characters" }
+            ]}
           >
-            <Input placeholder="Enter the title" />
+            <Input 
+              placeholder="Enter the title" 
+              maxLength={151} 
+            />
           </Form.Item>
 
           <Form.Item
             label="Content"
             name="content"
-            rules={[{ required: true, message: "Please enter the content" }]}
+            rules={[
+              { required: true, message: "Please enter the content" },
+              { max: 1000, message: "Content cannot be longer than 1000 characters" }
+            ]}
           >
-            <Input.TextArea rows={4} placeholder="Enter the content" />
+          <Input.TextArea rows={4} placeholder="Enter the content" maxLength={1001} />
           </Form.Item>
+
 
           <Form.Item label="Tags">
             <div style={{ marginBottom: "10px" }}>
@@ -177,14 +187,20 @@ const CreatePost: React.FC = () => {
               value={tagInput}
               onChange={handleTagInput}
               onKeyPress={handleTagKeyPress}
-              placeholder="Press Enter or ',' to add tags"
+              placeholder="Press Enter or ',' to add tags (max 5)"
               onBlur={() => {
-                if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+                if (
+                  tagInput.trim() &&
+                  !tags.includes(tagInput.trim()) &&
+                  tags.length < 5 // Only allow adding maximum of 5 tags
+                ) {
                   setTags([...tags, tagInput.trim()]);
                   setTagInput("");
                 }
               }}
+              disabled={tags.length >= 5} // Disable input if there are 5 tags
             />
+            {tags.length > 5 && <p style={{ color: 'red' }}>Maximum 5 tags allowed</p>}
           </Form.Item>
 
           <Form.Item label="Business">
@@ -211,21 +227,27 @@ const CreatePost: React.FC = () => {
               value={businessInput}
               onChange={handleBusinessInput}
               onKeyPress={handleBusinessKeyPress}
-              placeholder="Press Enter or ',' to add business units"
+              placeholder="Press Enter or ',' to add business units (max 5)"
               onBlur={() => {
                 if (
                   businessInput.trim() &&
-                  !businessUnits.includes(businessInput.trim())
+                  !businessUnits.includes(businessInput.trim()) &&
+                  businessUnits.length < 5 // Only allow adding maximum of 5 business units
                 ) {
                   setBusinessUnits([...businessUnits, businessInput.trim()]);
                   setBusinessInput("");
                 }
               }}
+              disabled={businessUnits.length >= 5} // Disable input if there are 5 business units
             />
+            {businessUnits.length > 5 && (
+              <p style={{ color: 'red' }}>Maximum 5 business units allowed</p>
+            )}
           </Form.Item>
 
+
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
+            <Button type="primary" htmlType="submit" loading={loading} disabled={tags.length > 5 || businessUnits.length > 5}>
               Create Post
             </Button>
           </Form.Item>

@@ -178,6 +178,7 @@ const PostCard: React.FC<PostCardProps> = ({
             <div style={{ display: "flex", gap: "16px" }}>
               <button
                 className="post-card-vote-btn"
+                aria-label="Like the post"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleToggleLike();

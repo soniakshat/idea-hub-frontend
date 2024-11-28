@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://api.techqubits.com', // Use HTTP as required
-  // baseURL: 'http://localhost:3200', // Use HTTP as required
+  // baseURL: 'https://api.techqubits.com', // Use HTTP as required
+  baseURL: 'http://localhost:3200', // Use HTTP as required
 });
 
 // Add a request interceptor to attach the token automatically

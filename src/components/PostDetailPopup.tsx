@@ -190,6 +190,7 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
             <Button
               type="primary"
               icon={<SendOutlined />}
+              aria-label="Add comment to the post"
               onClick={handleCommentSubmit}
               disabled={!comment.trim()}
             />
@@ -203,12 +204,14 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
               <Button
                 type="primary"
                 icon={<EditOutlined />}
+                aria-label="Edit this post"
                 onClick={handleEdit}
               />
             </Tooltip>
             <Tooltip title="Delete Post">
               <Popconfirm
                 title="Are you sure you want to delete this post?"
+                aria-label="Delete the post"
                 onConfirm={handleDelete}
                 okText="Yes"
                 cancelText="No"
