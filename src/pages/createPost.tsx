@@ -1,77 +1,34 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Tag, message, Select } from "antd";
+import { Form, Input, Button, Select, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./../components/Navbar.tsx";
 import API from "../api";
 import { generateUniqueId, getLocalStorageItem } from "../utils/utils";
 
-const { Option } = Select;
-
 const CreatePost: React.FC = () => {
   const navigate = useNavigate();
-
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-
   const [tags, setTags] = useState<string[]>([]);
   const [businessUnits, setBusinessUnits] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState<string>("");
-  const [businessInput, setBusinessInput] = useState<string>("");
-
-  const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTagInput(e.target.value);
-  };
-
-  const handleTagKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if ((e.key === "Enter" || e.key === ",")) {
-      e.preventDefault();
-      if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
-        setTagInput("");
-      }
-    }
-  };
-
-  const handleTagRemove = (removedTag: string) => {
-    setTags(tags.filter((tag) => tag !== removedTag));
-  };
-
-  const handleBusinessInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBusinessInput(e.target.value);
-  };
-
-  const handleBusinessKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      if (
-        businessInput.trim() &&
-        !businessUnits.includes(businessInput.trim())
-      ) {
-        setBusinessUnits([...businessUnits, businessInput.trim()]);
-        setBusinessInput("");
-      }
-    }
-  };
-
-  const handleBusinessRemove = (removedBusiness: string) => {
-    setBusinessUnits(
-      businessUnits.filter((business) => business !== removedBusiness)
-    );
-  };
-
+  const MAX_TAGS = 5;
+  const suffixTags = (
+    <>
+      <span>
+        {tags.length} / {MAX_TAGS}
+      </span>
+    </>
+  );
+  const suffixBusiness = (
+    <>
+      <span>
+        {businessUnits.length} / {MAX_TAGS}
+      </span>
+    </>
+  );
   const handleFormSubmit = async (values: any) => {
     try {
       setLoading(true);
-
-      if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-        setTags((prev) => [...prev, tagInput.trim()]);
-      }
-      if (
-        businessInput.trim() &&
-        !businessUnits.includes(businessInput.trim())
-      ) {
-        setBusinessUnits((prev) => [...prev, businessInput.trim()]);
-      }
 
       const token = getLocalStorageItem("authToken");
       const userName = getLocalStorageItem("userName");
@@ -143,12 +100,17 @@ const CreatePost: React.FC = () => {
             name="title"
             rules={[
               { required: true, message: "Please enter the title" },
-              { max: 150, message: "Title cannot be longer than 150 characters" }
+              {
+                max: 150,
+                message: "Title cannot be longer than 150 characters",
+              },
             ]}
           >
-            <Input 
-              placeholder="Enter the title" 
-              maxLength={151} 
+            <Input.TextArea
+              showCount
+              autoSize={{ minRows: 1, maxRows: 5 }}
+              placeholder="Enter the title"
+              maxLength={150}
             />
           </Form.Item>
 
@@ -157,97 +119,59 @@ const CreatePost: React.FC = () => {
             name="content"
             rules={[
               { required: true, message: "Please enter the content" },
-              { max: 1000, message: "Content cannot be longer than 1000 characters" }
+              {
+                max: 1000,
+                message: "Content cannot be longer than 1000 characters",
+              },
             ]}
           >
-          <Input.TextArea rows={4} placeholder="Enter the content" maxLength={1001} />
+            <Input.TextArea
+              showCount
+              placeholder="Enter the content"
+              autoSize={{ minRows: 3, maxRows: 5 }}
+              maxLength={1000}
+            />
           </Form.Item>
-
 
           <Form.Item label="Tags">
-            <div style={{ marginBottom: "10px" }}>
-              {tags.map((tag) => (
-                <Tag
-                  key={tag}
-                  closable
-                  style={{
-                    backgroundColor: "#e9ecef",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: "0.8rem",
-                    marginBottom: "6px",
-                  }}
-                  onClose={() => handleTagRemove(tag)}
-                >
-                  {tag}
-                </Tag>
-              ))}
-            </div>
-            <Input
-              value={tagInput}
-              onChange={handleTagInput}
-              onKeyPress={handleTagKeyPress}
-              placeholder="Press Enter or ',' to add tags (max 5)"
-              onBlur={() => {
-                if (
-                  tagInput.trim() &&
-                  !tags.includes(tagInput.trim()) &&
-                  tags.length < 5 // Only allow adding maximum of 5 tags
-                ) {
-                  setTags([...tags, tagInput.trim()]);
-                  setTagInput("");
+            <Select
+              mode="tags"
+              value={tags}
+              suffixIcon={suffixTags}
+              onChange={(selectedTags) => {
+                if (selectedTags.length <= 5) {
+                  setTags(selectedTags);
                 }
               }}
-              disabled={tags.length >= 5} // Disable input if there are 5 tags
+              tokenSeparators={[",", " "]}
+              placeholder={"Add up to " + MAX_TAGS + " tags"}
+              open={false} // Disable dropdown options
             />
-            {tags.length > 5 && <p style={{ color: 'red' }}>Maximum 5 tags allowed</p>}
           </Form.Item>
 
-          <Form.Item label="Business">
-            <div style={{ marginBottom: "10px" }}>
-              {businessUnits.map((business) => (
-                <Tag
-                  key={business}
-                  closable
-                  style={{
-                    color: "#1976d2",
-                    borderRadius: "4px",
-                    padding: "4px 8px",
-                    marginBottom: "6px",
-                    backgroundColor: "#e3f2fd",
-                    fontSize: "0.8rem",
-                  }}
-                  onClose={() => handleBusinessRemove(business)}
-                >
-                  {business}
-                </Tag>
-              ))}
-            </div>
-            <Input
-              value={businessInput}
-              onChange={handleBusinessInput}
-              onKeyPress={handleBusinessKeyPress}
-              placeholder="Press Enter or ',' to add business units (max 5)"
-              onBlur={() => {
-                if (
-                  businessInput.trim() &&
-                  !businessUnits.includes(businessInput.trim()) &&
-                  businessUnits.length < 5 // Only allow adding maximum of 5 business units
-                ) {
-                  setBusinessUnits([...businessUnits, businessInput.trim()]);
-                  setBusinessInput("");
+          <Form.Item label="Business Units">
+            <Select
+              mode="tags"
+              value={businessUnits}
+              suffixIcon={suffixBusiness}
+              onChange={(selectedBusiness) => {
+                if (selectedBusiness.length <= 5) {
+                  setBusinessUnits(selectedBusiness);
                 }
               }}
-              disabled={businessUnits.length >= 5} // Disable input if there are 5 business units
+              tokenSeparators={[",", " "]}
+              placeholder={"Add up to " + MAX_TAGS + " tags"}
+              open={false} // Disable dropdown options
             />
-            {businessUnits.length > 5 && (
-              <p style={{ color: 'red' }}>Maximum 5 business units allowed</p>
-            )}
           </Form.Item>
-
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} disabled={tags.length > 5 || businessUnits.length > 5}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              disabled={tags.length > 5 || businessUnits.length > 5}
+            >
               Create Post
             </Button>
           </Form.Item>

@@ -145,7 +145,7 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
         </header>
 
         <div className="post-card-content">{post.content}</div>
-
+        <br></br>
         <div className="post-card-tags">
           {post.tags?.map((tag, index) => (
             <span key={index} className="post-card-tag">
