@@ -12,6 +12,14 @@ import "./PostDetailPopup.scss";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 
+// Function to convert URLs in content to clickable links
+const convertUrlsToLinks = (content: string) => {
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  return content.replace(urlPattern, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+};
+
 interface PostDetailPopupProps {
   visible: boolean;
   post: Post;
@@ -23,12 +31,12 @@ interface PostDetailPopupProps {
 const statusColors: Record<string, { bg: string; font: string }> = {
   draft: { bg: "#FFC4C4", font: "#8B0000" },
   review: { bg: "#FFD9A0", font: "#8B4500" },
-  approved: { bg: "#A4FFC4", font: "#006400" },
+  approved: { bg: "#C4FFC4", font: "#006400" },
   dev: { bg: "#A0D9FF", font: "#003366" },
-  testing: { bg: "#F4A0FF", font: "#5D0071" },
-  completed: { bg: "#FFF4A0", font: "#8B7500" },
+  testing: { bg: "#FFF4A0", font: "#8B7500" },
+  completed: { bg: "#D9A0FF", font: "#5D0071" },
   archived: { bg: "#C4C4FF", font: "#00008B" },
-  published: { bg: "#FFC4F4", font: "#8B005D" },
+  published: { bg: "#FFC4E6", font: "#8B004B" },
 };
 
 const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
@@ -110,18 +118,21 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
     navigate(`/edit/${post._id}`);
   };
 
+  // Convert the post content to have clickable links
+  const contentWithLinks = convertUrlsToLinks(post.content);
+
   return (
     <Modal
       open={visible}
       onCancel={onClose}
       closable={false}
       footer={null}
-      width="80%"
+      width="100%"
       style={{
-        maxHeight: "85vh",
+        maxHeight: "100vh",
         overflow: "hidden",
         top: 20,
-        maxWidth: "90%",
+        maxWidth: "65%",
       }}
     >
       <div>
@@ -174,7 +185,11 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
             </div>
           </header>
 
-          <div className="post-card-content">{post.content}</div>
+          <div
+            className="post-card-content"
+            dangerouslySetInnerHTML={{ __html: contentWithLinks }}
+          ></div>
+          
           <br />
           <div className="post-card-tags">
             {post.tags?.map((tag, index) => (

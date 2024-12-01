@@ -199,18 +199,20 @@ const EditPost: React.FC = () => {
           )}
 
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              disabled={tags.length > 5 || businessUnits.length > 5}
-            >
-              Update Post
-            </Button>
-            &nbsp;&nbsp;&nbsp;
-            <Button type="primary" onClick={() => navigate("/home")}>
-              Cancel Edit
-            </Button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                disabled={tags.length > 5 || businessUnits.length > 5}
+              >
+                Update Post
+              </Button>
+              &nbsp;&nbsp;&nbsp;
+              <Button color="danger" variant="solid" onClick={() => navigate("/home")}>
+                Cancel
+              </Button>
+            </div>
           </Form.Item>
         </Form>
       </div>
