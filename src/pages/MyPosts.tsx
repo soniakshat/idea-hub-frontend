@@ -3,7 +3,7 @@ import API from "../api";
 import Navbar from "./../components/Navbar.tsx";
 import PostCard from "./../components/PostCard.tsx";
 import PostFilter from "./../components/PostFilter.tsx"; // Import PostFilter component
-import { Skeleton, Row, Col, Empty, message, Button } from "antd";
+import { Skeleton, Row, Col, Empty, message, Button, FloatButton } from "antd";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import { handleSearch } from "../utils/postActions";
 import { Post } from "../types/Post";
@@ -153,6 +153,7 @@ const MyPosts: React.FC = () => {
           <Empty description="No Posts Found" style={{ marginTop: "20px" }} />
         )}
       </div>
+      <FloatButton.BackTop />
     </>
   );
 };

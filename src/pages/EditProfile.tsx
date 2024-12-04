@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button, message, FloatButton } from "antd";
 import API from "../api";
 import { getLocalStorageItem } from "../utils/utils";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const EditProfile: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -83,6 +84,7 @@ const EditProfile: React.FC = () => {
         borderRadius: "8px",
       }}
     >
+      <Navbar />
       <h2 style={{ textAlign: "center" }}>Edit Profile</h2>
       <Form layout="vertical" form={form} onFinish={handleFormSubmit}>
         <Form.Item
@@ -151,6 +153,7 @@ const EditProfile: React.FC = () => {
           </div>
         </Form.Item>
       </Form>
+      <FloatButton.BackTop />
     </div>
   );
 };

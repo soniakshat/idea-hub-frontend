@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Select, message, Upload } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Select,
+  message,
+  Upload,
+  FloatButton,
+} from "antd";
 import { CloudUploadOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./../components/Navbar.tsx";
@@ -256,6 +264,7 @@ const EditPost: React.FC = () => {
             </div>
           </Form.Item>
         </Form>
+        <FloatButton.BackTop />
       </div>
     </>
   );

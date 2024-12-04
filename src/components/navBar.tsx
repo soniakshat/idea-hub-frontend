@@ -76,7 +76,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
             />
           </Link>
         </Tooltip>
-        <Tooltip title="Create Post">
+        {/* <Tooltip title="Create Post">
           <Link to="/create-post">
             <Button
               type="primary"
@@ -85,7 +85,7 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch, expandFilter }) => {
               aria-label="Go to Create Post"
             />
           </Link>
-        </Tooltip>
+        </Tooltip> */}
         <Tooltip title="Logout">
           <Button
             type="primary"

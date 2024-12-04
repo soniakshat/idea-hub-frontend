@@ -43,10 +43,10 @@ const PostCard: React.FC<PostCardProps> = ({
     const fetchAuthorDetails = async () => {
       try {
         const response = await API.get(`/user/${currentPost.author.id}`);
+        console.log(currentPost.author.id);
         setAuthor(response.data); // Update author details
       } catch (error) {
         console.error("Failed to fetch author details:", error);
-        message.error("Failed to load author details.");
       }
     };
     fetchAuthorDetails();

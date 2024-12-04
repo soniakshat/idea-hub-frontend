@@ -3,10 +3,12 @@ import API from "../api";
 import Navbar from "./../components/Navbar.tsx";
 import PostCard from "./../components/PostCard.tsx";
 import PostFilter from "./../components/PostFilter.tsx";
-import { Skeleton, Row, Col, message, Empty } from "antd";
+import { Skeleton, Row, Col, message, Empty, FloatButton } from "antd";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import { handleSearch } from "../utils/postActions";
 import { Post } from "../types/Post";
+import { useNavigate } from "react-router-dom";
+import { PlusOutlined } from "@ant-design/icons";
 
 function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -15,7 +17,7 @@ function Home() {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [availableBusinesses, setAvailableBusinesses] = useState<string[]>([]);
   const [isFilterExpanded, setIsFilterExpanded] = useState<boolean>(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -138,6 +140,15 @@ function Home() {
         ) : (
           <Empty description="No Posts Found" style={{ marginTop: "20px" }} />
         )}
+        <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
+          <FloatButton.BackTop />
+          <FloatButton
+            type="primary"
+            icon={<PlusOutlined />}
+            tooltip="Create Post"
+            onClick={() => navigate("/create-post")}
+          />
+        </FloatButton.Group>
       </div>
     </>
   );

@@ -56,7 +56,6 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
         setAuthor(response.data); // Update author details
       } catch (error) {
         console.error("Failed to fetch author details:", error);
-        message.error("Failed to load author details.");
       }
     };
     fetchAuthorDetails();
@@ -199,11 +198,6 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
               <div
                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
-                {/* Display file name */}
-                <span>
-                  <strong>File:</strong> {post.resource.split("/").pop()}
-                </span>
-
                 {/* Download Button */}
                 <Tooltip title="Download Resource">
                   <Button
