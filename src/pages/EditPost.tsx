@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Tag, message, Select } from "antd";
+import { Form, Input, Button, Select, message, Upload } from "antd";
+import { CloudUploadOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./../components/Navbar.tsx";
+import API from "../api";
 import { getLocalStorageItem } from "../utils/utils";
-const { Option } = Select;
-import API from "../api.js";
+
+const { Dragger } = Upload;
 
 const EditPost: React.FC = () => {
   const { postId } = useParams();
@@ -15,26 +17,12 @@ const EditPost: React.FC = () => {
 
   const [tags, setTags] = useState<string[]>([]);
   const [businessUnits, setBusinessUnits] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState<string>("");
-  const [businessInput, setBusinessInput] = useState<string>("");
-
-  const isModerator = getLocalStorageItem("is_moderator") === "true";
+  const [resource, setResource] = useState<File | null>(null);
+  const [currentResource, setCurrentResource] = useState<string | null>(null);
+  const [removeResource, setRemoveResource] = useState<boolean>(false);
 
   const MAX_TAGS = 5;
-  const suffixTags = (
-    <>
-      <span>
-        {tags.length} / {MAX_TAGS}
-      </span>
-    </>
-  );
-  const suffixBusiness = (
-    <>
-      <span>
-        {businessUnits.length} / {MAX_TAGS}
-      </span>
-    </>
-  );
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -43,49 +31,83 @@ const EditPost: React.FC = () => {
 
         setTags(postData.tags || []);
         setBusinessUnits(postData.business || []);
+        setCurrentResource(postData.resource || null);
 
         form.setFieldsValue({
-          ...postData,
+          title: postData.title,
+          content: postData.content,
+          status: postData.status,
         });
       } catch (error) {
         console.error("Error fetching post:", error);
-        message.error("Failed to fetch post data");
+        message.error("Failed to fetch post data.");
       }
     };
 
     fetchPost();
   }, [postId, form]);
 
-  const handleFormSubmit = async (values) => {
+  const handleFormSubmit = async (values: any) => {
     try {
       setLoading(true);
 
-      if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-        setTags((prev) => [...prev, tagInput.trim()]);
-      }
-      if (
-        businessInput.trim() &&
-        !businessUnits.includes(businessInput.trim())
-      ) {
-        setBusinessUnits((prev) => [...prev, businessInput.trim()]);
-      }
+      const token = getLocalStorageItem("authToken");
 
-      const transformedValues = {
-        ...values,
-        tags: tags,
+      const postPayload = new FormData();
+
+      const postObject = {
+        title: values.title,
+        content: values.content,
+        tags,
         business: businessUnits,
+        status: values.status,
+        removeResource,
       };
 
-      await API.put(`/api/posts/${postId}`, transformedValues);
+      postPayload.append("post", JSON.stringify(postObject));
+
+      if (resource) {
+        postPayload.append("resource", resource);
+      }
+
+      await API.put(`/api/posts/${postId}`, postPayload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       message.success("Post updated successfully!");
       navigate("/home");
-    } catch (error) {
-      console.error("Error updating post:", error);
-      message.error("Failed to update post");
+    } catch (error: any) {
+      console.error("Error updating post:", error.response || error);
+      message.error("Failed to update post. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFileChange = (info: any) => {
+    // If a file is being added (not removed)
+    if (info.file && info.file.status !== "removed") {
+      const isValidSize = info.file.size / 1024 / 1024 < 5; // File size < 5 MB
+
+      if (!isValidSize) {
+        message.error("File must be smaller than 5MB.");
+        return;
+      }
+
+      setResource(info.file); // Store the file
+      setRemoveResource(false); // Ensure the resource is not marked for removal
+      message.success(`${info.file.name} selected successfully.`);
+    }
+  };
+
+  const handleFileRemove = () => {
+    setResource(null); // Clear the selected file
+    setCurrentResource(null); // Update UI to reflect the removed resource
+    setRemoveResource(true); // Mark resource for removal
+    message.info("Resource will be removed.");
   };
 
   return (
@@ -111,6 +133,7 @@ const EditPost: React.FC = () => {
             content: "",
             tags: [],
             business: [],
+            status: "draft",
           }}
         >
           <Form.Item
@@ -155,15 +178,14 @@ const EditPost: React.FC = () => {
             <Select
               mode="tags"
               value={tags}
-              suffixIcon={suffixTags}
               onChange={(selectedTags) => {
-                if (selectedTags.length <= 5) {
+                if (selectedTags.length <= MAX_TAGS) {
                   setTags(selectedTags);
                 }
               }}
               tokenSeparators={[",", " "]}
-              placeholder={"Add up to " + MAX_TAGS + " tags"}
-              open={false} // Disable dropdown options
+              placeholder={`Add up to ${MAX_TAGS} tags`}
+              open={false}
             />
           </Form.Item>
 
@@ -171,35 +193,57 @@ const EditPost: React.FC = () => {
             <Select
               mode="tags"
               value={businessUnits}
-              suffixIcon={suffixBusiness}
               onChange={(selectedBusiness) => {
-                if (selectedBusiness.length <= 5) {
+                if (selectedBusiness.length <= MAX_TAGS) {
                   setBusinessUnits(selectedBusiness);
                 }
               }}
               tokenSeparators={[",", " "]}
-              placeholder="Add up to 5 business units"
-              open={false} // Disable dropdown options
+              placeholder={`Add up to ${MAX_TAGS} business units`}
+              open={false}
             />
           </Form.Item>
 
-          {isModerator && (
-            <Form.Item label="Status" name="status">
-              <Select>
-                <Option value="draft">Draft</Option>
-                <Option value="review">Review</Option>
-                <Option value="approved">Approved</Option>
-                <Option value="dev">Dev</Option>
-                <Option value="testing">Testing</Option>
-                <Option value="completed">Completed</Option>
-                <Option value="archived">Archived</Option>
-                <Option value="published">Published</Option>
-              </Select>
-            </Form.Item>
-          )}
+          <Form.Item label="Upload New Resource (Optional; Max 5MB)">
+            <Dragger
+              name="resource"
+              multiple={false}
+              beforeUpload={() => false} // Prevent automatic upload
+              fileList={
+                resource
+                  ? [{ uid: "-1", name: resource.name }]
+                  : currentResource
+                  ? [
+                      {
+                        uid: "-1",
+                        name: currentResource.split("/").pop() || "",
+                      },
+                    ]
+                  : []
+              }
+              onChange={handleFileChange} // Handle file selection or addition
+              onRemove={handleFileRemove} // Handle file removal
+            >
+              <p className="ant-upload-drag-icon">
+                <CloudUploadOutlined />
+              </p>
+              <p className="ant-upload-text">
+                Drag or click to select a new resource file
+              </p>
+              <p className="ant-upload-hint">
+                Upload a single file (Max size: 5MB).
+              </p>
+            </Dragger>
+          </Form.Item>
 
           <Form.Item>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
               <Button
                 type="primary"
                 htmlType="submit"
@@ -208,10 +252,7 @@ const EditPost: React.FC = () => {
               >
                 Update Post
               </Button>
-              &nbsp;&nbsp;&nbsp;
-              <Button color="danger" variant="solid" onClick={() => navigate("/home")}>
-                Cancel
-              </Button>
+              <Button onClick={() => navigate("/home")}>Cancel</Button>
             </div>
           </Form.Item>
         </Form>

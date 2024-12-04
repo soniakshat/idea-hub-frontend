@@ -29,16 +29,30 @@ const PostCard: React.FC<PostCardProps> = ({
   post,
   index,
   formatDate,
-  onDelete, // Receive delete callback
+  onDelete,
 }) => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [currentPost, setCurrentPost] = useState(post);
   const [isLiked, setIsLiked] = useState(false);
+  const [author, setAuthor] = useState<{ name: string } | null>(null);
 
-  const userId = localStorage.getItem("userId"); // Retrieve userId from local storage
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    // Check if the current user has already liked this post
+    // Fetch author details
+    const fetchAuthorDetails = async () => {
+      try {
+        const response = await API.get(`/user/${currentPost.author.id}`);
+        setAuthor(response.data); // Update author details
+      } catch (error) {
+        console.error("Failed to fetch author details:", error);
+        message.error("Failed to load author details.");
+      }
+    };
+    fetchAuthorDetails();
+  }, [currentPost.author.id]);
+
+  useEffect(() => {
     if (currentPost.likes.includes(userId || "")) {
       setIsLiked(true);
     }
@@ -53,7 +67,7 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const handleCommentSubmit = (updatedPost: Post) => {
-    setCurrentPost(updatedPost); // Update the post with the new comments
+    setCurrentPost(updatedPost);
   };
 
   const handleToggleLike = async () => {
@@ -62,16 +76,11 @@ const PostCard: React.FC<PostCardProps> = ({
         message.error("User ID missing!");
         return;
       }
-
-      // Use the API instance for the request
       const response = await API.put(
         `/api/posts/like/${currentPost._id}/by/${userId}`
       );
-
-      const result = response.data; // Extract data from the response
-      setIsLiked(result.status === 1); // Update like status
-
-      // Update likes in the current post
+      const result = response.data;
+      setIsLiked(result.status === 1);
       if (result.status === 1) {
         setCurrentPost((prevPost) => ({
           ...prevPost,
@@ -90,8 +99,8 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const handleDelete = (deletedPostId: string) => {
-    onDelete(deletedPostId); // Notify parent component about the deletion
-    setIsPopupVisible(false); // Close the popup
+    onDelete(deletedPostId);
+    setIsPopupVisible(false);
   };
 
   const filteredTags =
@@ -105,15 +114,13 @@ const PostCard: React.FC<PostCardProps> = ({
   }
 
   const TruncateText: React.FC<TruncateTextProps> = ({ text }) => {
-    const maxCharToShow = 250; // Fixed limit
+    const maxCharToShow = 250;
     const indicator = "...";
     const truncatedChars = maxCharToShow - indicator.length;
-
     const formattedText =
       text.length > maxCharToShow
         ? text.slice(0, truncatedChars) + indicator
         : text;
-
     return <div className="post-card-content">{formattedText}</div>;
   };
 
@@ -124,9 +131,9 @@ const PostCard: React.FC<PostCardProps> = ({
           <div className="post-card-author">
             <div style={{ display: "flex", alignItems: "center" }}>
               <div className="post-card-author-avatar">
-                {currentPost.author.name[0]}
+                {author?.name[0] || "?"}
               </div>
-              <span>{currentPost.author.name}</span>
+              <span>{author?.name || "Loading..."}</span>
             </div>
             <span
               className="post-card-status"
@@ -139,7 +146,6 @@ const PostCard: React.FC<PostCardProps> = ({
                   "#FFFFFF",
                 padding: "0.2rem 0.5rem",
                 borderRadius: "4px",
-                // fontWeight: "bold", // Optional for emphasis
               }}
             >
               {currentPost.status}
@@ -206,7 +212,7 @@ const PostCard: React.FC<PostCardProps> = ({
         post={currentPost}
         onClose={handlePopupClose}
         onCommentSubmit={handleCommentSubmit}
-        onDelete={handleDelete} // Pass delete handler to popup
+        onDelete={handleDelete}
       />
     </>
   );

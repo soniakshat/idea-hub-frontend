@@ -3,10 +3,11 @@ import API from "../api";
 import Navbar from "./../components/Navbar.tsx";
 import PostCard from "./../components/PostCard.tsx";
 import PostFilter from "./../components/PostFilter.tsx"; // Import PostFilter component
-import { Skeleton, Row, Col, Empty, message } from "antd";
+import { Skeleton, Row, Col, Empty, message, Button } from "antd";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import { handleSearch } from "../utils/postActions";
 import { Post } from "../types/Post";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const MyPosts: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -15,7 +16,7 @@ const MyPosts: React.FC = () => {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [availableBusinesses, setAvailableBusinesses] = useState<string[]>([]);
   const [isFilterExpanded, setIsFilterExpanded] = useState<boolean>(false);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchUserPosts = async () => {
       try {
@@ -127,6 +128,15 @@ const MyPosts: React.FC = () => {
           transition: "margin-left 0.3s ease",
         }}
       >
+        {/* Add Edit Profile Button */}
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <h2>My Posts</h2>
+          <Button type="primary" onClick={() => navigate("/edit-profile")}>
+            Edit Profile
+          </Button>
+        </div>
+        <br></br>
+
         {filteredPosts.length > 0 ? (
           <Row gutter={[16, 16]}>
             {filteredPosts.map((post, index) => (

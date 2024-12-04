@@ -15,6 +15,7 @@ export interface Post {
   timestamp: string;
   comments: { id: string; content: string; author: string; timestamp: string }[];
   likes: string[];
+  resource: string;
 }
 
 

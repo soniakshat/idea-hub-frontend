@@ -1,24 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Input, Tag, message, Popconfirm, Button, Tooltip } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
   SendOutlined,
   CloseOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import { Post } from "../types/Post";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import "./PostDetailPopup.scss";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
-
-// Function to convert URLs in content to clickable links
-const convertUrlsToLinks = (content: string) => {
-  const urlPattern = /(https?:\/\/[^\s]+)/g;
-  return content.replace(urlPattern, (url) => {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-  });
-};
 
 interface PostDetailPopupProps {
   visible: boolean;
@@ -49,10 +42,25 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
   const [comment, setComment] = useState<string>("");
   const [comments, setComments] = useState(post.comments);
   const [loading, setLoading] = useState(false); // State to manage button loading
+  const [author, setAuthor] = useState<{ name: string } | null>(null);
 
   const showButton =
     getLocalStorageItem("is_moderator") === "true" ||
     post.author.id === getLocalStorageItem("userId");
+
+  useEffect(() => {
+    // Fetch author details
+    const fetchAuthorDetails = async () => {
+      try {
+        const response = await API.get(`/user/${post.author.id}`);
+        setAuthor(response.data); // Update author details
+      } catch (error) {
+        console.error("Failed to fetch author details:", error);
+        message.error("Failed to load author details.");
+      }
+    };
+    fetchAuthorDetails();
+  }, [post.author.id]);
 
   const handleCommentSubmit = async () => {
     if (comment.trim()) {
@@ -118,9 +126,6 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
     navigate(`/edit/${post._id}`);
   };
 
-  // Convert the post content to have clickable links
-  const contentWithLinks = convertUrlsToLinks(post.content);
-
   return (
     <Modal
       open={visible}
@@ -138,8 +143,10 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
       <div>
         <div className="post-card-author">
           <div style={{ display: "flex", alignItems: "center" }}>
-            <div className="post-card-author-avatar">{post.author.name[0]}</div>
-            <span>{post.author.name}</span>
+            <div className="post-card-author-avatar">
+              {author?.name[0] || "?"}
+            </div>
+            <span>{author?.name || "Loading..."}</span>
           </div>
           <div style={{ display: "flex", alignItems: "right" }}>
             <span
@@ -185,11 +192,69 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
             </div>
           </header>
 
-          <div
-            className="post-card-content"
-            dangerouslySetInnerHTML={{ __html: contentWithLinks }}
-          ></div>
-          
+          <div className="post-card-content">{post.content}</div>
+
+          {post.resource && (
+            <div style={{ margin: "20px 0" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                {/* Display file name */}
+                <span>
+                  <strong>File:</strong> {post.resource.split("/").pop()}
+                </span>
+
+                {/* Download Button */}
+                <Tooltip title="Download Resource">
+                  <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    onClick={async () => {
+                      try {
+                        // Construct the full resource URL
+                        const resourceUrl = `${API.defaults.baseURL}/${post.resource}`;
+
+                        // Fetch the file content as a blob
+                        const response = await fetch(resourceUrl);
+                        if (!response.ok) {
+                          throw new Error(
+                            `Failed to fetch resource: ${response.statusText}`
+                          );
+                        }
+
+                        const blob = await response.blob();
+
+                        // Create an object URL for the blob
+                        const objectUrl = URL.createObjectURL(blob);
+
+                        // Create a temporary link element
+                        const link = document.createElement("a");
+                        link.href = objectUrl;
+                        link.download =
+                          post.resource.split("/").pop() || "resource"; // Use file name from URL
+                        document.body.appendChild(link);
+
+                        // Programmatically click the link to trigger download
+                        link.click();
+
+                        // Clean up by revoking the object URL and removing the link
+                        URL.revokeObjectURL(objectUrl);
+                        document.body.removeChild(link);
+                      } catch (error) {
+                        console.error("Error downloading resource:", error);
+                        message.error(
+                          "Failed to download resource. Please try again."
+                        );
+                      }
+                    }}
+                  >
+                    Download Resource
+                  </Button>
+                </Tooltip>
+              </div>
+            </div>
+          )}
+
           <br />
           <div className="post-card-tags">
             {post.tags?.map((tag, index) => (

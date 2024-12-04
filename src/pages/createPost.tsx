@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Select, message } from "antd";
+import { Form, Input, Button, Select, message, Upload } from "antd";
+import { CloudUploadOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./../components/Navbar.tsx";
 import API from "../api";
 import { generateUniqueId, getLocalStorageItem } from "../utils/utils";
+
+const { Dragger } = Upload;
 
 const CreatePost: React.FC = () => {
   const navigate = useNavigate();
@@ -11,21 +14,22 @@ const CreatePost: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [businessUnits, setBusinessUnits] = useState<string[]>([]);
+  const [resource, setResource] = useState<File | null>(null);
+
   const MAX_TAGS = 5;
+
   const suffixTags = (
-    <>
-      <span>
-        {tags.length} / {MAX_TAGS}
-      </span>
-    </>
+    <span>
+      {tags.length} / {MAX_TAGS}
+    </span>
   );
+
   const suffixBusiness = (
-    <>
-      <span>
-        {businessUnits.length} / {MAX_TAGS}
-      </span>
-    </>
+    <span>
+      {businessUnits.length} / {MAX_TAGS}
+    </span>
   );
+
   const handleFormSubmit = async (values: any) => {
     try {
       setLoading(true);
@@ -34,28 +38,40 @@ const CreatePost: React.FC = () => {
       const userName = getLocalStorageItem("userName");
       const userId = getLocalStorageItem("userId");
 
-      const postPayload = {
-        post: {
-          author: {
-            id: userId?.toString() || "",
-            name: userName || "",
-          },
-          id: generateUniqueId(),
-          title: values.title,
-          tags: tags,
-          business: businessUnits,
-          status: "draft",
-          content: values.content,
-          timestamp: new Date().toISOString(),
-          upvotes: 0,
-          downvotes: 0,
-          comments: [],
+      // Create a FormData object
+      const postPayload = new FormData();
+
+      // Construct the post object
+      const postObject = {
+        author: {
+          id: userId?.toString() || "",
+          name: userName || "",
         },
+        id: generateUniqueId(),
+        title: values.title,
+        tags,
+        business: businessUnits,
+        status: "draft",
+        content: values.content,
+        timestamp: new Date().toISOString(),
+        upvotes: 0,
+        downvotes: 0,
+        comments: [],
       };
 
+      // Add the post object as a JSON string
+      postPayload.append("post", JSON.stringify(postObject));
+
+      // Append the resource file if it exists
+      if (resource) {
+        postPayload.append("resource", resource);
+      }
+
+      // Send the POST request with FormData
       await API.post("/api/posts", postPayload, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -67,6 +83,23 @@ const CreatePost: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFileChange = (info: any) => {
+    const isValidSize = info.file.size / 1024 / 1024 < 5; // File size < 5 MB
+
+    if (!isValidSize) {
+      message.error("File must be smaller than 5MB.");
+      return;
+    }
+
+    setResource(info.file); // Store the file
+    message.success(`${info.file.name} selected successfully.`);
+  };
+
+  const handleFileRemove = () => {
+    setResource(null); // Clear the selected file
+    message.info("Resource removed.");
   };
 
   return (
@@ -144,7 +177,7 @@ const CreatePost: React.FC = () => {
                 }
               }}
               tokenSeparators={[",", " "]}
-              placeholder={"Add up to " + MAX_TAGS + " tags"}
+              placeholder={`Add up to ${MAX_TAGS} tags`}
               open={false} // Disable dropdown options
             />
           </Form.Item>
@@ -160,25 +193,51 @@ const CreatePost: React.FC = () => {
                 }
               }}
               tokenSeparators={[",", " "]}
-              placeholder={"Add up to " + MAX_TAGS + " tags"}
+              placeholder={`Add up to ${MAX_TAGS} business units`}
               open={false} // Disable dropdown options
             />
           </Form.Item>
 
+          <Form.Item label="Upload Resource">
+            <Dragger
+              name="resource"
+              multiple={false} // Only allow one file
+              beforeUpload={() => false} // Prevent automatic upload
+              fileList={resource ? [{ uid: "-1", name: resource.name }] : []} // Show selected file
+              onChange={handleFileChange}
+              onRemove={handleFileRemove} // Allow removing the file
+            >
+              <p className="ant-upload-drag-icon">
+                <CloudUploadOutlined />
+              </p>
+              <p className="ant-upload-text">
+                Click or drag file to this area to upload
+              </p>
+              <p className="ant-upload-hint">
+                Upload a single file (Max size: 5MB).
+              </p>
+            </Dragger>
+          </Form.Item>
+
           <Form.Item>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
               <Button
                 type="primary"
                 htmlType="submit"
                 loading={loading}
-                disabled={tags.length > 5 || businessUnits.length > 5}
+                disabled={
+                  tags.length > MAX_TAGS || businessUnits.length > MAX_TAGS
+                }
               >
                 Create Post
               </Button>
-              &nbsp;&nbsp;&nbsp;
-              <Button color="danger" variant="solid" onClick={() => navigate("/home")}>
-                Cancel
-              </Button>
+              <Button onClick={() => navigate("/home")}>Cancel</Button>
             </div>
           </Form.Item>
         </Form>
