@@ -134,8 +134,8 @@ const CreatePost: React.FC = () => {
             rules={[
               { required: true, message: "Please enter the title" },
               {
-                max: 150,
-                message: "Title cannot be longer than 150 characters",
+                max: 100,
+                message: "Title cannot be longer than 100 characters",
               },
             ]}
           >
@@ -143,7 +143,7 @@ const CreatePost: React.FC = () => {
               showCount
               autoSize={{ minRows: 1, maxRows: 5 }}
               placeholder="Enter the title"
-              maxLength={150}
+              maxLength={100}
             />
           </Form.Item>
 

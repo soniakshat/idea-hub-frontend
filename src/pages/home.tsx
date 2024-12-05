@@ -141,7 +141,7 @@ function Home() {
           <Empty description="No Posts Found" style={{ marginTop: "20px" }} />
         )}
         <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
-          <FloatButton.BackTop />
+          <FloatButton.BackTop tooltip="Go to Top"></FloatButton.BackTop>
           <FloatButton
             type="primary"
             icon={<PlusOutlined />}

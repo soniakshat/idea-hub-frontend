@@ -3,11 +3,12 @@ import API from "../api";
 import Navbar from "./../components/Navbar.tsx";
 import PostCard from "./../components/PostCard.tsx";
 import PostFilter from "./../components/PostFilter.tsx"; // Import PostFilter component
-import { Skeleton, Row, Col, Empty, message, Button, FloatButton } from "antd";
+import { Skeleton, Row, Col, Empty, message, Button, FloatButton,Tooltip } from "antd";
 import { formatDate, getLocalStorageItem } from "../utils/utils";
 import { handleSearch } from "../utils/postActions";
 import { Post } from "../types/Post";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { PlusOutlined } from "@ant-design/icons";
 
 const MyPosts: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -131,7 +132,7 @@ const MyPosts: React.FC = () => {
         {/* Add Edit Profile Button */}
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <h2>My Posts</h2>
-          <Button type="primary" onClick={() => navigate("/edit-profile")}>
+          <Button type="primary" onClick={() => navigate("/edit-profile")} >
             Edit Profile
           </Button>
         </div>
@@ -152,8 +153,16 @@ const MyPosts: React.FC = () => {
         ) : (
           <Empty description="No Posts Found" style={{ marginTop: "20px" }} />
         )}
+        <FloatButton.Group shape="circle" style={{ insetInlineEnd: 24 }}>
+          <FloatButton.BackTop tooltip="Go to Top"></FloatButton.BackTop>
+          <FloatButton
+            type="primary"
+            icon={<PlusOutlined />}
+            tooltip="Create Post"
+            onClick={() => navigate("/create-post")}
+          />
+        </FloatButton.Group>
       </div>
-      <FloatButton.BackTop />
     </>
   );
 };

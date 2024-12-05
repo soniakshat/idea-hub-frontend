@@ -199,52 +199,51 @@ const PostDetailPopup: React.FC<PostDetailPopupProps> = ({
                 style={{ display: "flex", alignItems: "center", gap: "10px" }}
               >
                 {/* Download Button */}
-                <Tooltip title="Download Resource">
-                  <Button
-                    type="primary"
-                    icon={<DownloadOutlined />}
-                    onClick={async () => {
-                      try {
-                        // Construct the full resource URL
-                        const resourceUrl = `${API.defaults.baseURL}/${post.resource}`;
+                <Button
+                  type="primary"
+                  icon={<DownloadOutlined />}
+                  onClick={async () => {
+                    try {
+                      // Construct the full resource URL
+                      const resourceUrl = `${API.defaults.baseURL}/${post.resource}`;
 
-                        // Fetch the file content as a blob
-                        const response = await fetch(resourceUrl);
-                        if (!response.ok) {
-                          throw new Error(
-                            `Failed to fetch resource: ${response.statusText}`
-                          );
-                        }
-
-                        const blob = await response.blob();
-
-                        // Create an object URL for the blob
-                        const objectUrl = URL.createObjectURL(blob);
-
-                        // Create a temporary link element
-                        const link = document.createElement("a");
-                        link.href = objectUrl;
-                        link.download =
-                          post.resource.split("/").pop() || "resource"; // Use file name from URL
-                        document.body.appendChild(link);
-
-                        // Programmatically click the link to trigger download
-                        link.click();
-
-                        // Clean up by revoking the object URL and removing the link
-                        URL.revokeObjectURL(objectUrl);
-                        document.body.removeChild(link);
-                      } catch (error) {
-                        console.error("Error downloading resource:", error);
-                        message.error(
-                          "Failed to download resource. Please try again."
+                      // Fetch the file content as a blob
+                      const response = await fetch(resourceUrl);
+                      if (!response.ok) {
+                        throw new Error(
+                          `Failed to fetch resource: ${response.statusText}`
                         );
                       }
-                    }}
-                  >
-                    Download Resource
-                  </Button>
-                </Tooltip>
+
+                      const blob = await response.blob();
+
+                      // Create an object URL for the blob
+                      const objectUrl = URL.createObjectURL(blob);
+
+                      // Create a temporary link element
+                      const link = document.createElement("a");
+                      link.href = objectUrl;
+                      link.download =
+                        post.resource.split("/").pop() || "resource"; // Use file name from URL
+                      document.body.appendChild(link);
+
+                      // Programmatically click the link to trigger download
+                      link.click();
+
+                      // Clean up by revoking the object URL and removing the link
+                      URL.revokeObjectURL(objectUrl);
+                      document.body.removeChild(link);
+                    } catch (error) {
+                      console.error("Error downloading resource:", error);
+                      message.error(
+                        "Failed to download resource. Please try again."
+                      );
+                    }
+                  }}
+                >
+                  Download Resource
+                </Button>
+
               </div>
             </div>
           )}

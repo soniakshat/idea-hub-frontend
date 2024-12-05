@@ -11,9 +11,10 @@ import {
 import { CloudUploadOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "./../components/Navbar.tsx";
-import API from "../api";
+import API from "../api.js";
 import { getLocalStorageItem } from "../utils/utils";
 
+const { Option } = Select;
 const { Dragger } = Upload;
 
 const EditPost: React.FC = () => {
@@ -28,6 +29,7 @@ const EditPost: React.FC = () => {
   const [resource, setResource] = useState<File | null>(null);
   const [currentResource, setCurrentResource] = useState<string | null>(null);
   const [removeResource, setRemoveResource] = useState<boolean>(false);
+  const isModerator = getLocalStorageItem("is_moderator") === "true";
 
   const MAX_TAGS = 5;
 
@@ -42,9 +44,7 @@ const EditPost: React.FC = () => {
         setCurrentResource(postData.resource || null);
 
         form.setFieldsValue({
-          title: postData.title,
-          content: postData.content,
-          status: postData.status,
+          ...postData,
         });
       } catch (error) {
         console.error("Error fetching post:", error);
@@ -141,7 +141,6 @@ const EditPost: React.FC = () => {
             content: "",
             tags: [],
             business: [],
-            status: "draft",
           }}
         >
           <Form.Item
@@ -150,8 +149,8 @@ const EditPost: React.FC = () => {
             rules={[
               { required: true, message: "Please enter the title" },
               {
-                max: 150,
-                message: "Title cannot be longer than 150 characters",
+                max: 100,
+                message: "Title cannot be longer than 100 characters",
               },
             ]}
           >
@@ -159,7 +158,7 @@ const EditPost: React.FC = () => {
               showCount
               autoSize={{ minRows: 1, maxRows: 5 }}
               placeholder="Enter the title"
-              maxLength={150}
+              maxLength={100}
             />
           </Form.Item>
 
@@ -211,8 +210,22 @@ const EditPost: React.FC = () => {
               open={false}
             />
           </Form.Item>
+          {isModerator && (
+            <Form.Item label="Status" name="status">
+              <Select>
+                <Option value="draft">Draft</Option>
+                <Option value="review">Review</Option>
+                <Option value="approved">Approved</Option>
+                <Option value="dev">Dev</Option>
+                <Option value="testing">Testing</Option>
+                <Option value="completed">Completed</Option>
+                <Option value="archived">Archived</Option>
+                <Option value="published">Published</Option>
+              </Select>
+            </Form.Item>
+          )}
 
-          <Form.Item label="Upload New Resource (Optional; Max 5MB)">
+          <Form.Item label="Upload New Resource">
             <Dragger
               name="resource"
               multiple={false}
